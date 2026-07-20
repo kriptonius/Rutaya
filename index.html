@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RutaYa</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07111F;--card:#0E1F33;--card2:#152840;--border:#1C3350;
+  --blue:#1E90FF;--neon:#00D4FF;--green:#10B981;--red:#EF4444;
+  --amber:#F59E0B;--gold:#F5C518;--wa:#25D366;--purple:#8B5CF6;
+  --text:#EEF6FF;--muted:#5A7A96;--soft:#8AAEC8;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#0A1828;border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo{font-size:20px;font-weight:900;}.logo span{color:var(--neon);}
+.logo small{font-size:9px;color:var(--muted);letter-spacing:2px;margin-left:4px;text-transform:uppercase;vertical-align:middle;}
+#topbar-right{display:flex;gap:8px;align-items:center;}
+.tb-pill{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;display:none;}
+#pill-admin{background:rgba(245,197,24,.15);color:var(--gold);}
+#pill-user{background:rgba(30,144,255,.15);color:var(--blue);}
+#btn-cfg{background:var(--border);border:none;color:var(--soft);width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:16px;}
+#screens{flex:1;overflow:hidden;position:relative;}
+.screen{position:absolute;inset:0;overflow-y:auto;display:none;}
+.screen.active{display:block;}
+#bottom-nav{display:flex;background:#0A1828;border-top:1px solid var(--border);flex-shrink:0;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px 10px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:'Inter',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;transition:color .2s;}
+.nav-btn.active{color:var(--neon);}
+.nav-btn .ni{font-size:20px;line-height:1;}
+#nav-admin{display:none;}
+.pad{padding:14px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+.card-title{font-size:15px;font-weight:800;margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.slabel{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.ibox{display:flex;align-items:center;gap:8px;background:#0A1828;border:1px solid var(--border);border-radius:10px;padding:10px 12px;transition:border-color .2s;}
+.ibox:focus-within{border-color:var(--blue);}
+.ibox input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;}
+.ibox input::placeholder{color:var(--muted);}
+input,textarea,select{width:100%;background:#0A1828;border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);}
+input[type=date]::-webkit-calendar-picker-indicator,input[type=time]::-webkit-calendar-picker-indicator{filter:invert(.4);cursor:pointer;}
+select option{background:var(--card);}
+textarea{resize:vertical;min-height:68px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.da{width:8px;height:8px;border-radius:50%;background:var(--neon);flex-shrink:0;}
+.db{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0;}
+.vln{width:1.5px;height:16px;background:var(--border);margin:2px 0 2px 11px;}
+.divider{height:1px;background:var(--border);margin:14px 0;}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:13px;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:opacity .15s;}
+.btn:hover{opacity:.88;}.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-neon{background:linear-gradient(135deg,#1E90FF,#00AAFF);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-gray{background:var(--border);color:var(--text);}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-wa{background:var(--wa);color:#fff;}
+.btn-blue{background:var(--blue);color:#fff;}
+.bsm-green{padding:7px 12px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;background:var(--green);color:#fff;}
+.bsm-red{padding:7px 12px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;background:var(--red);color:#fff;}
+.bsm-gray{padding:7px 12px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;background:var(--border);color:var(--text);}
+.bsm-wa{padding:7px 12px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;background:var(--wa);color:#fff;}
+.bsm-dim{padding:7px 12px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;background:rgba(90,122,150,.15);color:var(--muted);}
+.mt8{margin-top:8px;}.mt12{margin-top:12px;}
+.gps-btn{width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;background:rgba(0,212,255,.1);color:var(--neon);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.gps-btn:hover{background:var(--neon);color:#000;}
+#toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:12px;font-weight:700;font-size:13px;color:#fff;white-space:nowrap;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;max-width:90vw;overflow:hidden;text-overflow:ellipsis;}
+#toast.show{opacity:1;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--card2);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:18px 18px 30px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;animation:slideUp .22s ease;}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mhandle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.modal h3{font-size:16px;font-weight:800;margin-bottom:14px;}
+.badge{font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
+.b-p{background:rgba(245,158,11,.15);color:var(--amber);}
+.b-c{background:rgba(30,144,255,.15);color:var(--blue);}
+.b-d{background:rgba(90,122,150,.1);color:var(--muted);}
+#map-box{background:#0A1828;border:1px solid var(--border);border-radius:12px;overflow:hidden;height:170px;position:relative;margin-bottom:12px;}
+.map-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:12px;}
+/* HERO */
+#sc-landing{padding:0;}
+.hero{min-height:55vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px 20px 28px;background:radial-gradient(ellipse at 30% 20%,rgba(0,212,255,.1) 0%,transparent 55%),linear-gradient(180deg,#0D1E35 0%,var(--bg) 100%);}
+.hero-tag{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--neon);background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);padding:5px 14px;border-radius:20px;margin-bottom:18px;}
+.hero-title{font-size:40px;font-weight:900;line-height:1.05;letter-spacing:-1.5px;margin-bottom:10px;}
+.hero-title span{background:linear-gradient(135deg,#1E90FF,#00D4FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:14px;color:var(--soft);line-height:1.6;max-width:290px;margin:0 auto 22px;}
+.hero-stars{font-size:12px;color:var(--muted);margin-bottom:24px;}
+.hero-stars span{color:var(--gold);}
+.hero-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:290px;}
+.hbtn-main{padding:16px;background:linear-gradient(135deg,#1E90FF,#00AAFF);color:#fff;border:none;border-radius:14px;font-family:'Inter',sans-serif;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 28px rgba(30,144,255,.3);}
+.hbtn-sec{padding:14px;background:rgba(255,255,255,.05);color:var(--soft);border:1px solid var(--border);border-radius:14px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.hbtn-sec:hover{background:rgba(255,255,255,.09);}
+.feats{display:flex;gap:8px;overflow-x:auto;padding:14px 14px 4px;scrollbar-width:none;}
+.feats::-webkit-scrollbar{display:none;}
+.feat{display:flex;align-items:center;gap:6px;white-space:nowrap;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:7px 13px;font-size:12px;font-weight:600;color:var(--soft);flex-shrink:0;}
+.ad-wrap{padding:0 14px 12px;}
+.ad-card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(135deg,#1a1060,#2d1b8a);border:1px solid rgba(139,92,246,.3);border-radius:13px;padding:13px 15px;cursor:pointer;}
+.ad-lbl{font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--purple);margin-bottom:3px;}
+.ad-name{font-size:14px;font-weight:800;}.ad-desc{font-size:11px;color:rgba(255,255,255,.6);}
+#ad-close{background:none;border:none;color:rgba(255,255,255,.3);font-size:18px;cursor:pointer;padding:0 0 0 6px;}
+.mkt-wrap{padding:0 14px 20px;}
+.mkt-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.mkt-hdr h3{font-size:13px;font-weight:800;}
+.mkt-hdr button{background:none;border:none;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+.mkt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mkt-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;text-align:center;cursor:pointer;transition:border-color .2s;}
+.mkt-card:hover{border-color:var(--purple);}
+.mkt-icon{font-size:24px;margin-bottom:5px;}.mkt-name{font-size:12px;font-weight:800;margin-bottom:2px;}.mkt-desc{font-size:10px;color:var(--muted);}
+.mkt-tag{font-size:9px;font-weight:700;color:var(--purple);background:rgba(139,92,246,.1);padding:2px 7px;border-radius:10px;display:inline-block;margin-top:5px;}
+.footer-sig{text-align:center;padding:14px;font-size:9px;font-weight:700;color:rgba(90,122,150,.3);letter-spacing:3px;text-transform:uppercase;}
+.pending-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:24px;}
+.pending-icon{font-size:64px;margin-bottom:16px;animation:pulse2 2s ease-in-out infinite;}
+@keyframes pulse2{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.pending-title{font-size:20px;font-weight:900;margin-bottom:8px;}
+.pending-sub{font-size:14px;color:var(--muted);line-height:1.6;max-width:280px;margin:0 auto 20px;}
+.pending-steps{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:20px;text-align:left;width:100%;max-width:320px;}
+.pstep{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.pstep:last-child{border:none;}
+.pstep-n{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.pstep-n.done{background:var(--green);color:#fff;}
+.pstep-n.active{background:var(--amber);color:#000;}
+.pstep-n.wait{background:var(--border);color:var(--muted);}
+.pstep-t{font-size:12px;font-weight:600;}.pstep-s{font-size:10px;color:var(--muted);margin-top:1px;}
+/* SOLICITAR */
+.zone-bar{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:12px;cursor:pointer;transition:border-color .2s;}
+.zone-bar:hover{border-color:var(--blue);}
+.zi{flex:1;}.zn{font-size:13px;font-weight:700;}.zs{font-size:10px;color:var(--muted);}
+.zc{font-size:11px;color:var(--blue);font-weight:700;}
+.dcard{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px;margin-bottom:8px;cursor:pointer;transition:border-color .2s;}
+.dcard:hover{border-color:var(--neon);}
+.dcard.sel{border-color:var(--neon);background:rgba(0,212,255,.05);}
+.dav{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#112244,#1E3A6A);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;position:relative;}
+.vdot{position:absolute;bottom:-2px;right:-2px;width:15px;height:15px;background:var(--green);border-radius:50%;border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:8px;}
+.di{flex:1;}.dn{font-size:13px;font-weight:800;margin-bottom:2px;}.dc{font-size:11px;color:var(--muted);}
+.dstars{display:flex;align-items:center;gap:2px;margin-top:3px;}
+.str{font-size:11px;}.str.on{color:var(--gold);}.str.off{color:var(--border);}
+.rn{font-size:10px;font-weight:700;color:var(--soft);margin-left:2px;}
+.chip{font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;}
+.chip-f{background:rgba(90,122,150,.12);color:var(--muted);}
+.chip-b{background:rgba(30,144,255,.12);color:var(--blue);}
+.chip-p{background:rgba(245,197,24,.12);color:var(--gold);}
+/* WALLET */
+.whero{background:linear-gradient(135deg,#0D2A50,#152E5A);border:1px solid rgba(30,144,255,.25);border-radius:16px;padding:20px;margin-bottom:14px;}
+.wlbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.wamt{font-size:36px;font-weight:900;letter-spacing:-1px;}
+.wamt em{font-size:16px;color:var(--muted);font-style:normal;font-weight:600;}
+.wid{font-size:11px;color:var(--muted);margin-top:4px;}
+.wbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.wbtn{padding:11px;border:none;border-radius:11px;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+.wbtn-add{background:var(--green);color:#fff;}
+.wbtn-hist{background:var(--border);color:var(--text);}
+.txn{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:11px 13px;margin-bottom:7px;}
+.txn-n{font-size:13px;font-weight:700;}.txn-d{font-size:10px;color:var(--muted);margin-top:1px;}
+.txn-v{font-size:15px;font-weight:900;}.txn-in{color:var(--green);}.txn-out{color:var(--red);}
+/* AGENDA */
+.pbar{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(0,212,255,.07),var(--card));border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
+.pav{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--neon),var(--blue));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.pn{font-size:14px;font-weight:800;}.ps{font-size:11px;color:var(--muted);}
+.ppl{font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:3px;text-transform:uppercase;}
+.ppl.free{background:rgba(90,122,150,.12);color:var(--muted);}
+.ppl.basic{background:rgba(30,144,255,.12);color:var(--blue);}
+.ppl.pro{background:rgba(245,197,24,.12);color:var(--gold);}
+.pr{font-size:20px;font-weight:900;color:var(--gold);text-align:right;}
+.prl{font-size:9px;color:var(--muted);}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.sbox{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 6px;text-align:center;}
+.sn{font-size:24px;font-weight:900;}.sl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+/* CALENDAR */
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-hdr h3{font-size:14px;font-weight:800;}
+.cal-nav{display:flex;gap:5px;align-items:center;}
+.cal-nav button{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.cal-nav button:hover{background:var(--blue);border-color:var(--blue);}
+.cal-nav span{font-size:12px;font-weight:700;min-width:100px;text-align:center;}
+.cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:12px;}
+.cal-wds{display:grid;grid-template-columns:repeat(7,1fr);background:#0A1828;border-bottom:1px solid var(--border);}
+.wd{text-align:center;padding:6px 2px;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);}
+.cday{min-height:56px;padding:5px 3px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.cday:nth-child(7n){border-right:none;}
+.cday:hover{background:#0A1828;}
+.cday.today .cdn{background:var(--neon);color:#000;border-radius:50%;}
+.cday.sel{background:rgba(0,212,255,.07);}
+.cday.other{opacity:.25;}
+.cdn{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;margin-bottom:2px;}
+.cev{display:block;font-size:8px;font-weight:700;border-radius:3px;padding:1px 3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cev.pending{background:var(--amber);color:#000;}
+.cev.confirmed{background:var(--neon);color:#000;}
+.cev.done{background:var(--border);color:var(--muted);}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.tcard:hover{border-color:var(--neon);}
+.tc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.tc-time{font-size:18px;font-weight:900;}
+.tc-route{display:flex;flex-direction:column;gap:5px;}
+.tc-pt{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--soft);}
+.tc-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.tc-mi{font-size:10px;color:var(--muted);}
+.tc-mi strong{display:block;font-size:12px;color:var(--text);font-weight:600;}
+.tc-acts{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+.empty{text-align:center;padding:32px 14px;color:var(--muted);font-size:13px;}
+/* ADMIN */
+.astats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
+.astat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;}
+.astat .n{font-size:24px;font-weight:900;color:var(--neon);}
+.astat .l{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.astat .s{font-size:11px;color:var(--green);margin-top:2px;}
+.atabs{display:flex;gap:3px;background:#0A1828;border-radius:10px;padding:3px;margin-bottom:12px;}
+.atab{flex:1;padding:7px 3px;border:none;background:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;}
+.atab.active{background:var(--card2);color:var(--text);}
+.drow{display:flex;align-items:flex-start;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;}
+.dav2{width:38px;height:38px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.di2{flex:1;}.dn2{font-size:13px;font-weight:800;margin-bottom:2px;}.dm{font-size:10px;color:var(--muted);line-height:1.5;}
+.dacts{display:flex;flex-direction:column;gap:3px;flex-shrink:0;}
+.sbtn{padding:5px 9px;border-radius:7px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:9px;font-weight:700;}
+.sbtn-v{background:rgba(0,212,255,.12);color:var(--neon);}
+.sbtn-a{background:rgba(16,185,129,.12);color:var(--green);}
+.sbtn-s{background:rgba(239,68,68,.12);color:var(--red);}
+.sbtn-p{background:rgba(245,158,11,.12);color:var(--amber);}
+.irow2{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:11px 12px;margin-bottom:7px;}
+.in{font-size:13px;font-weight:700;}.im{font-size:10px;color:var(--muted);}
+.ip{font-size:15px;font-weight:900;color:var(--green);}
+.is{font-size:10px;}.paid{color:var(--green);}.due{color:var(--amber);}
+/* PLANES */
+.pc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:10px;position:relative;}
+.pc.feat{border-color:var(--neon);background:linear-gradient(135deg,rgba(0,212,255,.06),var(--card));}
+.pbadge{position:absolute;top:-1px;right:14px;background:var(--neon);color:#000;font-size:9px;font-weight:800;padding:3px 9px;border-radius:0 0 8px 8px;text-transform:uppercase;}
+.pname{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.pprice{font-size:28px;font-weight:900;line-height:1;margin-bottom:3px;}
+.pprice em{font-size:13px;color:var(--muted);font-style:normal;font-weight:500;}
+.pfeats{list-style:none;margin:10px 0 13px;}
+.pfeats li{font-size:12px;color:var(--soft);padding:4px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
+.pfeats li:last-child{border:none;}
+.pfeats li::before{content:'v';color:var(--green);font-weight:800;flex-shrink:0;}
+/* AUTH */
+.atabs2{display:flex;background:#0A1828;border-radius:10px;padding:3px;margin-bottom:16px;}
+.atab2{flex:1;padding:8px;border:none;background:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;}
+.atab2.active{background:var(--neon);color:#000;}
+.psel{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:6px;}
+.psopt{padding:9px 4px;background:#0A1828;border:1px solid var(--border);border-radius:9px;text-align:center;cursor:pointer;transition:all .2s;}
+.psopt.active{border-color:var(--neon);background:rgba(0,212,255,.07);}
+.psopt .psn{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;}
+.psopt.active .psn{color:var(--neon);}
+.psopt .psp{font-size:14px;font-weight:900;margin-top:1px;}
+/* STARS */
+.srating{display:flex;gap:4px;justify-content:center;margin:10px 0;}
+.srtn{font-size:32px;background:none;border:none;cursor:pointer;padding:0;transition:transform .15s;}
+.srtn:hover{transform:scale(1.2);}
+.amgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;}
+.amgrid button{padding:10px 4px;background:var(--border);border:none;border-radius:9px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;font-weight:800;cursor:pointer;}
+.amgrid button:hover{background:var(--blue);}
+@media(min-width:520px){.overlay{align-items:center;}.modal{border-radius:18px;max-width:460px;}}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="logo">Ruta<span>Ya</span><small>by Estrada</small></div>
+  <div id="topbar-right">
+    <span class="tb-pill" id="pill-admin">ADMIN</span>
+    <span class="tb-pill" id="pill-user"></span>
+    <button id="btn-cfg">⚙️</button>
+  </div>
+</div>
+<div id="screens">
+  <!-- LANDING -->
+  <div class="screen active" id="sc-landing">
+    <div class="hero">
+      <div class="hero-tag">Transporte inteligente</div>
+      <div class="hero-title">Viaja con<br><span>confianza</span></div>
+      <div class="hero-sub">Taxistas verificados, rutas en Google Maps, confirmacion instantanea por WhatsApp.</div>
+      <div class="hero-stars"><span>★★★★★</span> +500 viajes seguros</div>
+      <div class="hero-btns">
+        <button class="hbtn-main" id="go-solicitar">Solicitar un viaje ahora</button>
+        <button class="hbtn-sec" id="go-planes">Soy taxista — Ver planes</button>
+      </div>
+    </div>
+    <div class="feats">
+      <div class="feat">✅ Taxistas verificados</div>
+      <div class="feat">📍 GPS en tiempo real</div>
+      <div class="feat">💬 WhatsApp directo</div>
+      <div class="feat">💳 Billetera digital</div>
+      <div class="feat">⭐ Calificaciones</div>
+      <div class="feat">🗺️ Google Maps</div>
+    </div>
+    <div class="ad-wrap">
+      <div class="ad-card" id="ad-card">
+        <div>
+          <div class="ad-lbl">Publicidad</div>
+          <div class="ad-name">Burger Palace</div>
+          <div class="ad-desc">20% OFF en tu proxima orden solo hoy</div>
+        </div>
+        <div style="font-size:30px">🍔</div>
+        <button id="ad-close">✕</button>
+      </div>
+    </div>
+    <div class="mkt-wrap">
+      <div class="mkt-hdr"><h3>Marketplace RutaYa</h3><button id="mkt-all">Ver todo</button></div>
+      <div class="mkt-grid">
+        <div class="mkt-card" id="mk1"><div class="mkt-icon">🔧</div><div class="mkt-name">MecanicaYa</div><div class="mkt-desc">Servicio a domicilio</div><div class="mkt-tag">Partner</div></div>
+        <div class="mkt-card" id="mk2"><div class="mkt-icon">🛒</div><div class="mkt-name">MercadoYa</div><div class="mkt-desc">Delivery express</div><div class="mkt-tag">Partner</div></div>
+        <div class="mkt-card" id="mk3"><div class="mkt-icon">🍕</div><div class="mkt-name">ComidaYa</div><div class="mkt-desc">Comida a tu puerta</div><div class="mkt-tag">Partner</div></div>
+        <div class="mkt-card" id="mk4"><div class="mkt-icon">📣</div><div class="mkt-name">Anunciate</div><div class="mkt-desc">Llega a miles de usuarios</div><div class="mkt-tag">+ Ingresos</div></div>
+      </div>
+    </div>
+    <div class="footer-sig">Powered by Estrada Tech</div>
+  </div>
+  <!-- SOLICITAR -->
+  <div class="screen" id="sc-solicitar">
+    <div class="pad">
+      <div class="zone-bar" id="zone-bar">
+        <span style="font-size:18px">📡</span>
+        <div class="zi"><div class="zn" id="zn">Lima, Peru</div><div class="zs" id="zs">Cargando taxistas...</div></div>
+        <div class="zc">Cambiar</div>
+      </div>
+      <div id="map-box"><div class="map-ph" id="map-ph"><span style="font-size:26px;opacity:.15">🗺️</span><span>El mapa aparece aqui</span></div></div>
+      <div class="card">
+        <div class="card-title">A donde vas?</div>
+        <div class="card-sub">Elige un taxista y te confirmamos por WhatsApp.</div>
+        <div class="field">
+          <label>PUNTO DE RECOJO</label>
+          <div class="ibox"><div class="da"></div><input type="text" id="f-origen" placeholder="Donde te recojo?"><button class="gps-btn" id="gps-o">📍</button></div>
+        </div>
+        <div class="vln"></div>
+        <div class="field">
+          <label>DESTINO</label>
+          <div class="ibox"><div class="db"></div><input type="text" id="f-destino" placeholder="A donde vas?"><button class="gps-btn" id="gps-d">📍</button></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>FECHA</label><input type="date" id="f-fecha"></div>
+          <div class="field"><label>HORA</label><input type="time" id="f-hora"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>TU NOMBRE</label><input type="text" id="f-nombre" placeholder="Nombre completo"></div>
+          <div class="field"><label>TU CELULAR</label><input type="tel" id="f-cel" placeholder="999 888 777"></div>
+        </div>
+        <div class="field"><label>NOTAS</label><textarea id="f-notas" placeholder="Personas, equipaje, instrucciones..."></textarea></div>
+      </div>
+      <div class="slabel">ELIGE TU TAXISTA</div>
+      <div id="dpicker"></div>
+      <button class="btn btn-neon mt8" id="btn-sol" style="margin-top:12px">Solicitar viaje</button>
+    </div>
+  </div>
+  <!-- WALLET -->
+  <div class="screen" id="sc-wallet">
+    <div class="pad">
+      <div class="slabel" style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px">Mi billetera</div>
+      <div class="whero">
+        <div class="wlbl">Saldo disponible</div>
+        <div class="wamt"><em>S/</em> <span id="w-amt">0.00</span></div>
+        <div class="wid" id="w-id">-</div>
+        <div class="wbtns">
+          <button class="wbtn wbtn-add" id="btn-rec">Recargar</button>
+          <button class="wbtn wbtn-hist" id="btn-hist">Historial</button>
+        </div>
+      </div>
+      <div class="slabel">Ultimas transacciones</div>
+      <div id="txn-list"></div>
+      <div class="card mt8">
+        <div class="card-title">Como funciona?</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:6px">
+          Recarga con <strong style="color:var(--text)">Yape, Plin o transferencia</strong> — el saldo se acredita en minutos.<br><br>
+          Usa tu saldo para pagar viajes sin efectivo.<br><br>
+          <span style="color:var(--neon)">Proximamente:</span> pago automatico integrado.
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- AGENDA -->
+  <div class="screen" id="sc-agenda">
+    <!-- PANTALLA PENDIENTE DE VERIFICACION -->
+    <div id="pbar-pending" style="display:none">
+      <div class="pending-screen">
+        <div class="pending-icon">⏳</div>
+        <div class="pending-title">Cuenta en revision</div>
+        <div class="pending-sub">Hola <strong id="pend-name"></strong>, tu solicitud fue recibida. El equipo RutaYa esta verificando tus datos.</div>
+        <div class="pending-steps">
+          <div class="pstep"><div class="pstep-n done">1</div><div><div class="pstep-t">Registro completado</div><div class="pstep-s">Tus datos fueron enviados al administrador</div></div></div>
+          <div class="pstep"><div class="pstep-n active">2</div><div><div class="pstep-t">Verificacion en proceso</div><div class="pstep-s">El administrador revisa tu DNI, placa y auto. Menos de 24 horas.</div></div></div>
+          <div class="pstep"><div class="pstep-n wait">3</div><div><div class="pstep-t">Cuenta activada</div><div class="pstep-s">Recibiras un WhatsApp de confirmacion y podras usar la app</div></div></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;max-width:280px;">
+          Si tienes dudas escribe al administrador:
+        </div>
+        <button class="btn btn-wa" style="max-width:280px;" id="btn-contactar-admin">Contactar al administrador</button>
+        <button class="btn btn-gray mt8" style="max-width:280px;" id="btn-refresh-status">Actualizar estado</button>
+      </div>
+    </div>
+    <!-- CONTENIDO AGENDA (solo verificados) -->
+    <div id="agenda-content">
+    <div class="pad">
+      <div id="pbar" style="display:none" class="pbar">
+        <div class="pav">🚕</div>
+        <div style="flex:1">
+          <div class="pn" id="p-n">-</div>
+          <div class="ps" id="p-c">-</div>
+          <div class="ps" id="p-a" style="margin-top:1px">-</div>
+          <span class="ppl free" id="p-pl">Plan Gratis</span>
+        </div>
+        <div><div class="pr" id="p-r">-</div><div class="prl">calificacion</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="sbox"><div class="sn" style="color:var(--amber)" id="st-p">0</div><div class="sl">Pendientes</div></div>
+        <div class="sbox"><div class="sn" style="color:var(--neon)" id="st-c">0</div><div class="sl">Confirmados</div></div>
+        <div class="sbox"><div class="sn" style="color:var(--green)" id="st-d">0</div><div class="sl">Completados</div></div>
+      </div>
+      <div class="cal-hdr">
+        <h3>Mi agenda</h3>
+        <div class="cal-nav">
+          <button id="cal-prev">&#8249;</button>
+          <span id="cal-lbl">-</span>
+          <button id="cal-next">&#8250;</button>
+        </div>
+      </div>
+      <div class="cal-wrap">
+        <div class="cal-wds"><div class="wd">D</div><div class="wd">L</div><div class="wd">M</div><div class="wd">X</div><div class="wd">J</div><div class="wd">V</div><div class="wd">S</div></div>
+        <div id="cal-days"></div>
+      </div>
+      <div class="slabel" id="list-lbl">Todos los viajes</div>
+      <div id="trip-list"></div>
+    </div>
+    </div><!-- /agenda-content -->
+  </div>
+  <!-- ADMIN -->
+  <div class="screen" id="sc-admin">
+    <div class="pad">
+      <div class="slabel" style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px">Panel de control</div>
+      <div class="astats" id="astats"></div>
+      <div class="atabs">
+        <button class="atab active" data-tab="drivers">Taxistas</button>
+        <button class="atab" data-tab="income">Ingresos</button>
+        <button class="atab" data-tab="trips">Viajes</button>
+        <button class="atab" data-tab="ads">Publicidad</button>
+      </div>
+      <div id="acontent"></div>
+    </div>
+  </div>
+</div>
+<div id="bottom-nav">
+  <button class="nav-btn active" data-scr="landing"><span class="ni">🏠</span>Inicio</button>
+  <button class="nav-btn" data-scr="solicitar"><span class="ni">🚗</span>Solicitar</button>
+  <button class="nav-btn" data-scr="wallet"><span class="ni">💳</span>Billetera</button>
+  <button class="nav-btn" data-scr="agenda"><span class="ni">📅</span>Agenda</button>
+  <button class="nav-btn" data-scr="admin" id="nav-admin"><span class="ni">👑</span>Admin</button>
+</div>
+<div id="toast"></div>
+<!-- PLANES -->
+<div class="overlay" id="m-planes">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <h3>Unete como taxista</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Sin comisiones por viaje. Suscripcion mensual fija. Solicitudes directo a tu WhatsApp.</p>
+    <div class="pc"><div class="pname">Gratis</div><div class="pprice">S/0 <em>/mes</em></div><ul class="pfeats"><li>Hasta 10 viajes/mes</li><li>Notificacion WhatsApp</li><li>Perfil basico</li></ul><button class="btn btn-gray go-reg">Empezar gratis</button></div>
+    <div class="pc feat"><div class="pbadge">Popular</div><div class="pname">Basico</div><div class="pprice">S/30 <em>/mes</em></div><ul class="pfeats"><li>Viajes ilimitados</li><li>Perfil verificado</li><li>Calendario agenda</li><li>Calificacion visible</li></ul><button class="btn btn-neon go-reg">Contratar S/30/mes</button></div>
+    <div class="pc"><div class="pname">Pro</div><div class="pprice">S/60 <em>/mes</em></div><ul class="pfeats"><li>Todo del Basico</li><li>Hasta 3 conductores</li><li>Perfil destacado</li><li>Soporte prioritario</li></ul><button class="btn btn-gray go-reg">Contratar S/60/mes</button></div>
+    <button class="btn btn-gray mt8" id="close-planes">Cerrar</button>
+  </div>
+</div>
+<!-- REGISTRO -->
+<div class="overlay" id="m-reg">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <h3>Cuenta de taxista</h3>
+    <div class="atabs2">
+      <button class="atab2 active" id="tab-r">Registrarme</button>
+      <button class="atab2" id="tab-l">Ya tengo cuenta</button>
+    </div>
+    <div id="frm-r">
+      <div class="field"><label>Nombre completo</label><input type="text" id="r-nombre" placeholder="Pedro Garcia Lopez"></div>
+      <div class="field"><label>Celular WhatsApp</label><input type="tel" id="r-cel" placeholder="987 654 321"></div>
+      <div class="field"><label>Correo electronico</label><input type="email" id="r-email" placeholder="correo@gmail.com"></div>
+      <div class="field"><label>Contrasena</label><input type="password" id="r-pass" placeholder="Minimo 6 caracteres"></div>
+      <div class="row2"><div class="field"><label>Auto</label><input type="text" id="r-auto" placeholder="Toyota Corolla"></div><div class="field"><label>Placa</label><input type="text" id="r-placa" placeholder="ABC-123"></div></div>
+      <div class="field"><label>Plan</label>
+        <div class="psel">
+          <div class="psopt active" data-plan="free"><div class="psn">Gratis</div><div class="psp">S/0</div></div>
+          <div class="psopt" data-plan="basic"><div class="psn">Basico</div><div class="psp">S/30</div></div>
+          <div class="psopt" data-plan="pro"><div class="psn">Pro</div><div class="psp">S/60</div></div>
+        </div>
+      </div>
+      <button class="btn btn-neon" id="btn-reg">Crear cuenta</button>
+    </div>
+    <div id="frm-l" style="display:none">
+      <div class="field"><label>Celular o correo</label><input type="text" id="l-u" placeholder="987654321 o correo"></div>
+      <div class="field"><label>Contrasena</label><input type="password" id="l-p" placeholder="Tu contrasena"></div>
+      <button class="btn btn-neon mt8" id="btn-log">Ingresar</button>
+    </div>
+    <button class="btn btn-gray mt8" id="close-reg">Cerrar</button>
+  </div>
+</div>
+<!-- ZONA -->
+<div class="overlay" id="m-zona">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <h3>Selecciona tu zona</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Los taxistas disponibles son los de tu misma ciudad.</p>
+    <div id="zona-list"></div>
+    <button class="btn btn-gray mt12" id="btn-det-zona">Detectar mi zona automaticamente</button>
+    <button class="btn btn-gray mt8" id="close-zona">Cerrar</button>
+  </div>
+</div>
+<!-- DETALLE VIAJE -->
+<div class="overlay" id="m-viaje">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <h3 id="mv-title"></h3>
+    <div id="mv-body"></div>
+    <button class="btn btn-gray mt12" id="close-viaje">Cerrar</button>
+  </div>
+</div>
+<!-- CALIFICAR -->
+<div class="overlay" id="m-rate">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <h3>Califica tu viaje</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px" id="ri"></p>
+    <div class="srating">
+      <button class="srtn" data-s="1">☆</button>
+      <button class="srtn" data-s="2">☆</button>
+      <button class="srtn" data-s="3">☆</button>
+      <button class="srtn" data-s="4">☆</button>
+      <button class="srtn" data-s="5">☆</button>
+    </div>
+    <p style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px" id="rl">Toca una estrella</p>
+    <div class="field"><label>Comentario opcional</label><textarea id="rc" placeholder="Como fue tu experiencia?"></textarea></div>
+    <button class="btn btn-neon" id="btn-rate">Enviar calificacion</button>
+    <button class="btn btn-gray mt8" id="close-rate">Cancelar</button>
+  </div>
+</div>
+<!-- RECARGAR -->
+<div class="overlay" id="m-rec">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <h3>Recargar billetera</h3>
+    <div class="field"><label>Elige el monto</label>
+      <div class="amgrid">
+        <button data-m="10">S/10</button><button data-m="20">S/20</button>
+        <button data-m="50">S/50</button><button data-m="100">S/100</button>
+      </div>
+      <input type="number" id="m-inp" placeholder="Otro monto..." min="5" step="5">
+    </div>
+    <div class="field"><label>Metodo de pago</label>
+      <select id="m-met"><option value="Yape">Yape</option><option value="Plin">Plin</option><option value="Transferencia">Transferencia bancaria</option><option value="Efectivo">Efectivo presencial</option></select>
+    </div>
+    <div style="background:rgba(30,144,255,.07);border:1px solid rgba(30,144,255,.2);border-radius:11px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--soft);line-height:1.6">
+      Envia el monto a <strong style="color:var(--text)">+51 987 000 001</strong> (RutaYa)<br>
+      Indica tu nombre en el comentario. Se acredita en menos de 10 minutos.
+    </div>
+    <button class="btn btn-neon" id="btn-conf-rec">Solicitar recarga</button>
+    <button class="btn btn-gray mt8" id="close-rec">Cancelar</button>
+  </div>
+</div>
+<!-- ANUNCIAR -->
+<div class="overlay" id="m-ad">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <h3>Anunciate en RutaYa</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Tu negocio llega a miles de usuarios. Banner principal en la app.</p>
+    <div class="row2" style="margin-bottom:14px">
+      <div class="card" style="text-align:center"><div class="pname">Banner basico</div><div style="font-size:22px;font-weight:900">S/50<span style="font-size:12px;color:var(--muted)">/sem</span></div><div style="font-size:11px;color:var(--muted)">Logo + nombre + mensaje</div></div>
+      <div class="card" style="text-align:center;border-color:var(--purple)"><div class="pname" style="color:var(--purple)">Banner Pro</div><div style="font-size:22px;font-weight:900">S/150<span style="font-size:12px;color:var(--muted)">/sem</span></div><div style="font-size:11px;color:var(--muted)">Logo + oferta + metricas</div></div>
+    </div>
+    <div class="field"><label>Nombre de tu negocio</label><input type="text" id="ad-n" placeholder="Burger Palace"></div>
+    <div class="field"><label>Tu WhatsApp</label><input type="tel" id="ad-c" placeholder="987 654 321"></div>
+    <button class="btn btn-neon" id="btn-ad">Contactar para anunciarme</button>
+    <button class="btn btn-gray mt8" id="close-ad">Cerrar</button>
+  </div>
+</div>
+<!-- SETTINGS -->
+<div class="overlay" id="m-cfg">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <h3>Configuracion</h3>
+    <div class="field"><label>WhatsApp del taxista por defecto</label>
+      <div class="ibox"><span style="color:var(--muted);font-size:13px;white-space:nowrap">+51</span><input type="tel" id="cfg-c" placeholder="987654321" maxlength="9"></div>
+    </div>
+    <div class="field"><label>Nombre</label><input type="text" id="cfg-n" placeholder="Nombre del taxista"></div>
+    <button class="btn btn-neon mt8" id="btn-save-cfg">Guardar</button>
+    <div class="divider"></div>
+    <div class="field"><label>Contrasena de administrador</label><input type="password" id="adm-p" placeholder="Solo para el propietario"></div>
+    <button class="btn btn-gold mt8" id="btn-adm-log">Acceder como administrador</button>
+    <div class="divider"></div>
+    <button class="btn btn-gray" id="btn-logout">Cerrar sesion</button>
+    <button class="btn btn-gray mt8" id="close-cfg">Cerrar</button>
+  </div>
+</div>
+
+<script>
+var ADMIN_PASS = 'estrada2025';
+var ZONAS = ['Lima, Peru','Callao, Peru','Ayacucho, Peru','Arequipa, Peru','Cusco, Peru','Trujillo, Peru','Piura, Peru'];
+var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var HOY = new Date();
+
+function hoyStr(){ return HOY.toISOString().split('T')[0]; }
+function fl(f){ return f ? f.split('-').reverse().join('/') : '-'; }
+
+// ESTADO
+var D = {
+  trips:   JSON.parse(localStorage.getItem('ry2_trips')   || '[]'),
+  drivers: JSON.parse(localStorage.getItem('ry2_drivers') || '[]'),
+  ratings: JSON.parse(localStorage.getItem('ry2_ratings') || '[]'),
+  wallets: JSON.parse(localStorage.getItem('ry2_wallets') || '{}'),
+  txns:    JSON.parse(localStorage.getItem('ry2_txns')    || '[]'),
+  config:  JSON.parse(localStorage.getItem('ry2_config')  || '{"cel":"","nombre":"","zona":"Lima, Peru"}'),
+  session: JSON.parse(localStorage.getItem('ry2_session') || 'null'),
+  isAdmin: JSON.parse(localStorage.getItem('ry2_admin')   || 'false')
+};
+var cid = localStorage.getItem('ry2_cid') || (function(){ var id='c'+Date.now(); localStorage.setItem('ry2_cid',id); return id; })();
+var selDriver = null, selPlan = 'free', rVal = 0, rTripId = null;
+var calY = HOY.getFullYear(), calM = HOY.getMonth(), calSel = null, aTab = 'drivers', mapT = null;
+
+function save(k,v){ localStorage.setItem('ry2_'+k, JSON.stringify(v)); }
+function saveT(){ save('trips',D.trips); updStats(); }
+function saveD(){ save('drivers',D.drivers); }
+function saveR(){ save('ratings',D.ratings); }
+function saveW(){ save('wallets',D.wallets); save('txns',D.txns); }
+function saveCfg(){ save('config',D.config); }
+function saveS(){ save('session',D.session); }
+
+// SEED
+if(!D.drivers.length){
+  D.drivers=[
+    {id:101,nombre:'Pedro Garcia',celular:'987001001',email:'pedro@demo.com',pass:btoa('demo'),auto:'Toyota Corolla 2020',placa:'ABC-123',plan:'basic',status:'active',verified:true,fechaReg:hoyStr(),pagado:true,zona:'Lima, Peru'},
+    {id:102,nombre:'Maria Condori',celular:'987002002',email:'maria@demo.com',pass:btoa('demo'),auto:'Hyundai Accent 2019',placa:'DEF-456',plan:'pro',status:'active',verified:true,fechaReg:hoyStr(),pagado:true,zona:'Lima, Peru'},
+    {id:103,nombre:'Jose Quispe',celular:'987003003',email:'jose@demo.com',pass:btoa('demo'),auto:'Kia Rio 2021',placa:'GHI-789',plan:'free',status:'pending',verified:false,fechaReg:hoyStr(),pagado:false,zona:'Ayacucho, Peru'}
+  ]; saveD();
+}
+if(!D.trips.length){
+  D.trips=[
+    {id:1,nombre:'Carlos Quispe',celular:'987654321',origen:'Miraflores Lima',destino:'San Isidro',fecha:hoyStr(),hora:'08:30',notas:'2 personas',status:'pending',driverId:101,zona:'Lima, Peru'},
+    {id:2,nombre:'Ana Flores',celular:'976543210',origen:'Surco',destino:'Aeropuerto Jorge Chavez',fecha:hoyStr(),hora:'14:00',notas:'Maleta grande',status:'done',driverId:102,zona:'Lima, Peru'}
+  ]; saveT();
+}
+if(!D.ratings.length){ D.ratings=[{id:1,driverId:101,tripId:99,stars:5,comment:'Excelente',fecha:hoyStr()},{id:2,driverId:102,tripId:98,stars:5,comment:'Muy profesional',fecha:hoyStr()}]; saveR(); }
+if(!D.wallets[cid]) D.wallets[cid]=35;
+if(!D.txns.length){ D.txns=[{id:1,cid:cid,tipo:'in',monto:50,desc:'Recarga Yape',fecha:hoyStr()},{id:2,cid:cid,tipo:'out',monto:15,desc:'Viaje a San Isidro',fecha:hoyStr()}]; saveW(); }
+
+// HELPERS
+function drRating(id){ var rs=D.ratings.filter(function(r){return r.driverId===id;}); return rs.length?(rs.reduce(function(a,r){return a+r.stars;},0)/rs.length).toFixed(1):null; }
+function starsH(r){ if(!r) return '<span style="font-size:10px;color:var(--muted)">Nuevo</span>'; var v=parseFloat(r),s='<div class="dstars">'; for(var i=1;i<=5;i++) s+='<span class="str '+(i<=Math.round(v)?'on':'off')+'">'+(i<=Math.round(v)?'★':'☆')+'</span>'; return s+'<span class="rn">'+r+'</span></div>'; }
+function chipH(p){ var c={free:'chip-f',basic:'chip-b',pro:'chip-p'},l={free:'Gratis',basic:'Basico',pro:'Pro'}; return '<span class="chip '+(c[p]||'chip-f')+'">'+(l[p]||'Gratis')+'</span>'; }
+function getZona(){ return D.config.zona||'Lima, Peru'; }
+
+// TOAST
+var tT;
+function toast(msg,tp){
+  var el=document.getElementById('toast'); el.textContent=msg;
+  el.style.background=tp==='warn'?'var(--amber)':tp==='err'?'var(--red)':'var(--green)';
+  el.classList.add('show'); clearTimeout(tT); tT=setTimeout(function(){el.classList.remove('show');},3500);
+}
+
+// MODAL
+function om(id){ document.getElementById(id).classList.add('open'); }
+function cm(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(function(ov){
+  ov.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
+});
+
+// NAV
+function goTo(name){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('sc-'+name).classList.add('active');
+  var nb=document.querySelector('.nav-btn[data-scr="'+name+'"]');
+  if(nb) nb.classList.add('active');
+  if(name==='solicitar') renderPicker();
+  if(name==='agenda'){ renderCal(); if(D.session) renderPBar(); }
+  if(name==='admin') renderAdmin();
+  if(name==='wallet') renderWallet();
+}
+document.querySelectorAll('.nav-btn').forEach(function(b){
+  b.addEventListener('click',function(){ goTo(this.dataset.scr); });
+});
+
+// UI
+function updUI(){
+  var pu=document.getElementById('pill-user'), pa=document.getElementById('pill-admin'), na=document.getElementById('nav-admin');
+  if(D.session){ pu.style.display='inline-block'; pu.textContent=D.session.nombre.split(' ')[0]; }
+  else { pu.style.display='none'; }
+  if(D.isAdmin){ pa.style.display='inline-block'; na.style.display='flex'; }
+  else { pa.style.display='none'; na.style.display='none'; }
+}
+
+// LANDING
+document.getElementById('go-solicitar').addEventListener('click',function(){ goTo('solicitar'); });
+document.getElementById('go-planes').addEventListener('click',function(){ om('m-planes'); });
+document.getElementById('ad-close').addEventListener('click',function(e){ e.stopPropagation(); document.getElementById('ad-card').style.display='none'; });
+document.getElementById('ad-card').addEventListener('click',function(){ toast('Abriendo oferta...'); });
+document.getElementById('mkt-all').addEventListener('click',function(){ toast('Marketplace completo proximamente'); });
+document.getElementById('mk1').addEventListener('click',function(){ toast('MecanicaYa - Proximamente'); });
+document.getElementById('mk2').addEventListener('click',function(){ toast('MercadoYa - Proximamente'); });
+document.getElementById('mk3').addEventListener('click',function(){ toast('ComidaYa - Proximamente'); });
+document.getElementById('mk4').addEventListener('click',function(){ om('m-ad'); });
+
+// PLANES
+document.querySelectorAll('.go-reg').forEach(function(b){ b.addEventListener('click',function(){ cm('m-planes'); om('m-reg'); }); });
+document.getElementById('close-planes').addEventListener('click',function(){ cm('m-planes'); });
+
+// REGISTRO
+document.getElementById('tab-r').addEventListener('click',function(){ document.getElementById('frm-r').style.display='block'; document.getElementById('frm-l').style.display='none'; this.classList.add('active'); document.getElementById('tab-l').classList.remove('active'); });
+document.getElementById('tab-l').addEventListener('click',function(){ document.getElementById('frm-l').style.display='block'; document.getElementById('frm-r').style.display='none'; this.classList.add('active'); document.getElementById('tab-r').classList.remove('active'); });
+document.querySelectorAll('.psopt').forEach(function(o){ o.addEventListener('click',function(){ document.querySelectorAll('.psopt').forEach(function(x){x.classList.remove('active');}); this.classList.add('active'); selPlan=this.dataset.plan; }); });
+
+document.getElementById('btn-reg').addEventListener('click',function(){
+  var n=document.getElementById('r-nombre').value.trim();
+  var c=document.getElementById('r-cel').value.replace(/\D/g,'');
+  var e=document.getElementById('r-email').value.trim();
+  var p=document.getElementById('r-pass').value;
+  var a=document.getElementById('r-auto').value.trim();
+  var pl=document.getElementById('r-placa').value.trim().toUpperCase();
+  if(!n||!c||!e||!p||!a||!pl){ toast('Completa todos los campos','warn'); return; }
+  if(p.length<6){ toast('Contrasena minimo 6 caracteres','warn'); return; }
+  if(D.drivers.find(function(d){return d.celular===c||d.email===e;})){ toast('Ya existe cuenta con ese celular o correo','warn'); return; }
+  var dr={id:Date.now(),nombre:n,celular:c,email:e,pass:btoa(p),auto:a,placa:pl,plan:selPlan,status:'pending',verified:false,fechaReg:hoyStr(),pagado:false,zona:getZona()};
+  D.drivers.push(dr); saveD();
+  D.session={id:dr.id,nombre:n,celular:c,plan:selPlan,auto:a,placa:pl}; saveS();
+  saveCfg(); updUI(); cm('m-reg');
+  // WhatsApp al admin con datos del nuevo taxista
+  var adminCel=D.config.cel||'';
+  if(adminCel){
+    var pln={free:'Gratis S/0',basic:'Basico S/30/mes',pro:'Pro S/60/mes'};
+    var msg='NUEVO TAXISTA — RutaYa\n---\nNombre: '+n+'\nCelular: +51 '+c+'\nCorreo: '+e+'\nAuto: '+a+'\nPlaca: '+pl+'\nPlan: '+(pln[selPlan]||selPlan)+'\nZona: '+getZona()+'\nFecha registro: '+hoyStr()+'\n---\nEntra al Panel Admin para VERIFICAR o RECHAZAR.';
+    window.open('https://wa.me/51'+adminCel.replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');
+  }
+  toast('Solicitud enviada. El administrador verificara tu cuenta pronto.');
+  setTimeout(function(){ goTo('agenda'); },900);
+});
+
+document.getElementById('btn-log').addEventListener('click',function(){
+  var u=document.getElementById('l-u').value.trim();
+  var p=document.getElementById('l-p').value;
+  if(!u||!p){ toast('Ingresa tus datos','warn'); return; }
+  var dr=D.drivers.find(function(d){return (d.celular===u.replace(/\D/g,'')||d.email===u)&&d.pass===btoa(p);});
+  if(!dr){ toast('Datos incorrectos','warn'); return; }
+  D.session={id:dr.id,nombre:dr.nombre,celular:dr.celular,plan:dr.plan,auto:dr.auto,placa:dr.placa}; saveS();
+  D.config.cel=dr.celular; D.config.nombre=dr.nombre; saveCfg();
+  updUI(); cm('m-reg');
+  toast('Bienvenido '+dr.nombre.split(' ')[0]);
+  setTimeout(function(){ goTo('agenda'); },700);
+});
+document.getElementById('close-reg').addEventListener('click',function(){ cm('m-reg'); });
+
+// GPS
+function detectGPS(inpId,btnId){
+  if(!navigator.geolocation){ toast('GPS no disponible','warn'); return; }
+  var btn=document.getElementById(btnId), inp=document.getElementById(inpId);
+  btn.textContent='🔄';
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude, lng=pos.coords.longitude;
+    fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&accept-language=es')
+      .then(function(r){return r.json();})
+      .then(function(data){
+        var a=data.address;
+        var pts=[a.road||a.pedestrian,a.house_number,a.suburb||a.neighbourhood||a.city_district,a.city||a.town||a.village].filter(Boolean);
+        inp.value=pts.length>=2?pts.join(', '):data.display_name.split(',').slice(0,3).join(', ');
+        btn.textContent='📍'; updMap(); toast('Ubicacion detectada');
+      }).catch(function(){ inp.value=lat.toFixed(5)+', '+lng.toFixed(5); btn.textContent='📍'; updMap(); });
+  },function(err){
+    btn.textContent='📍';
+    var m={1:'Permiso denegado. Ve a Ajustes del celular y activa la ubicacion.',2:'Sin senal GPS.',3:'Tiempo agotado.'};
+    toast(m[err.code]||'No se pudo obtener ubicacion','warn');
+  },{enableHighAccuracy:true,timeout:10000,maximumAge:0});
+}
+document.getElementById('gps-o').addEventListener('click',function(){ detectGPS('f-origen','gps-o'); });
+document.getElementById('gps-d').addEventListener('click',function(){ detectGPS('f-destino','gps-d'); });
+
+// MAPA
+function updMap(){
+  var o=document.getElementById('f-origen').value.trim();
+  var d=document.getElementById('f-destino').value.trim();
+  var box=document.getElementById('map-box'), ph=document.getElementById('map-ph');
+  var iframe=box.querySelector('iframe'), lnk=document.getElementById('map-lnk');
+  if(!o&&!d){ ph.style.display='flex'; if(iframe)iframe.remove(); if(lnk)lnk.remove(); return; }
+  ph.style.display='none';
+  if(!iframe){ iframe=document.createElement('iframe'); iframe.style.cssText='width:100%;height:100%;border:none;'; iframe.loading='lazy'; box.appendChild(iframe); }
+  iframe.src='https://maps.google.com/maps?q='+encodeURIComponent(d||o)+'&output=embed&hl=es&z=14';
+  if(!lnk){ lnk=document.createElement('a'); lnk.id='map-lnk'; lnk.target='_blank'; lnk.rel='noopener'; lnk.style.cssText='position:absolute;bottom:7px;right:7px;background:var(--neon);color:#000;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;text-decoration:none;z-index:10;'; lnk.textContent='Abrir en Maps'; box.appendChild(lnk); }
+  lnk.href=(o&&d)?'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(o)+'&destination='+encodeURIComponent(d)+'&travelmode=driving':'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o||d);
+}
+document.getElementById('f-origen').addEventListener('input',function(){ clearTimeout(mapT); mapT=setTimeout(updMap,700); });
+document.getElementById('f-destino').addEventListener('input',function(){ clearTimeout(mapT); mapT=setTimeout(updMap,700); });
+
+// ZONA
+document.getElementById('zone-bar').addEventListener('click',openZonaModal);
+document.getElementById('close-zona').addEventListener('click',function(){ cm('m-zona'); });
+document.getElementById('btn-det-zona').addEventListener('click',function(){
+  if(!navigator.geolocation){ toast('GPS no disponible','warn'); return; }
+  toast('Detectando tu zona...');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude, zona='Lima, Peru';
+    if(lat<-15) zona='Arequipa, Peru';
+    else if(lat<-13) zona='Cusco, Peru';
+    else if(lat<-12.5) zona='Ayacucho, Peru';
+    selectZona(zona); cm('m-zona');
+  },function(){ toast('No se pudo detectar la zona','warn'); },{timeout:8000});
+});
+
+function openZonaModal(){
+  var list=document.getElementById('zona-list');
+  list.innerHTML=ZONAS.map(function(z){
+    return '<div class="zona-opt" data-zona="'+z+'" style="padding:12px;background:'+(z===getZona()?'rgba(0,212,255,.08)':'var(--card)')+';border:1px solid '+(z===getZona()?'var(--neon)':'var(--border)')+';border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;"><span style="font-size:14px;font-weight:600">'+z+'</span>'+(z===getZona()?'<span style="color:var(--neon);font-size:12px;font-weight:700">Activa</span>':'')+'</div>';
+  }).join('');
+  list.querySelectorAll('.zona-opt').forEach(function(el){ el.addEventListener('click',function(){ selectZona(this.dataset.zona); cm('m-zona'); }); });
+  om('m-zona');
+}
+
+function selectZona(zona){
+  D.config.zona=zona; saveCfg();
+  document.getElementById('zn').textContent=zona;
+  var n=D.drivers.filter(function(d){return d.status==='active'&&d.verified&&d.zona===zona;}).length;
+  document.getElementById('zs').textContent=n>0?n+' taxista'+(n>1?'s':'')+' disponible'+(n>1?'s':''):'Sin taxistas en esta zona aun';
+  renderPicker(); toast('Zona: '+zona);
+}
+
+// DRIVER PICKER
+function renderPicker(){
+  var el=document.getElementById('dpicker');
+  var zona=getZona();
+  document.getElementById('zn').textContent=zona;
+  var lista=D.drivers.filter(function(d){return d.status==='active'&&d.verified;});
+  var mz=lista.filter(function(d){return d.zona===zona;});
+  if(mz.length) lista=mz;
+  var n=lista.length;
+  document.getElementById('zs').textContent=n>0?n+' taxista'+(n>1?'s':'')+' disponible'+(n>1?'s':''):'Elige una zona o ingresa numero manual';
+  if(!lista.length){
+    el.innerHTML='<div class="card" style="text-align:center"><div style="font-size:28px;margin-bottom:8px">🚕</div><div style="font-size:14px;font-weight:800;margin-bottom:8px">Sin taxistas verificados en esta zona</div><button class="btn btn-gray" id="btn-chg-zona" style="margin-bottom:12px">Cambiar zona</button><div class="field"><label>O ingresa el numero del taxista</label><div class="ibox"><span style="color:var(--muted);font-size:13px;white-space:nowrap">+51</span><input type="tel" id="manual-cel" placeholder="987 654 321" maxlength="9"></div></div></div>';
+    document.getElementById('btn-chg-zona').addEventListener('click',openZonaModal);
+    document.getElementById('manual-cel').addEventListener('input',function(){
+      if(this.value.replace(/\D/g,'').length>=9){ selDriver='manual'; document.getElementById('btn-sol').disabled=false; }
+      else{ selDriver=null; document.getElementById('btn-sol').disabled=true; }
+    });
+    document.getElementById('btn-sol').disabled=true; return;
+  }
+  el.innerHTML=lista.map(function(d){
+    var r=drRating(d.id), nt=D.trips.filter(function(t){return t.driverId===d.id&&t.status==='done';}).length;
+    return '<div class="dcard" data-did="'+d.id+'"><div class="dav">🚕<div class="vdot">✓</div></div><div class="di"><div class="dn">'+d.nombre+'</div><div class="dc">'+( d.auto||'-')+' · '+(d.placa||'-')+'</div>'+starsH(r)+'<span style="font-size:10px;color:var(--muted)">'+nt+' viajes</span></div>'+chipH(d.plan)+'</div>';
+  }).join('');
+  el.querySelectorAll('.dcard').forEach(function(card){
+    card.addEventListener('click',function(){
+      el.querySelectorAll('.dcard').forEach(function(c){c.classList.remove('sel');});
+      this.classList.add('sel');
+      selDriver=parseInt(this.dataset.did);
+      document.getElementById('btn-sol').disabled=false;
+      toast('Taxista seleccionado');
+    });
+  });
+  document.getElementById('btn-sol').disabled=true;
+}
+
+// *** SOLICITAR VIAJE — BOTON PRINCIPAL ***
+document.getElementById('btn-sol').addEventListener('click',function(){
+  var origen  = document.getElementById('f-origen').value.trim();
+  var destino = document.getElementById('f-destino').value.trim();
+  var fecha   = document.getElementById('f-fecha').value;
+  var hora    = document.getElementById('f-hora').value;
+  var nombre  = document.getElementById('f-nombre').value.trim();
+  var celular = document.getElementById('f-cel').value.trim();
+  var notas   = document.getElementById('f-notas').value.trim();
+
+  if(!origen)  { toast('Ingresa el punto de recojo','warn'); return; }
+  if(!destino) { toast('Ingresa el destino','warn'); return; }
+  if(!fecha)   { toast('Selecciona la fecha','warn'); return; }
+  if(!hora)    { toast('Selecciona la hora','warn'); return; }
+  if(!nombre)  { toast('Ingresa tu nombre','warn'); return; }
+  if(!celular) { toast('Ingresa tu celular','warn'); return; }
+  if(!selDriver){ toast('Elige un taxista de la lista','warn'); return; }
+
+  var dCel='', dNom='Taxista';
+  if(selDriver==='manual'){
+    var mc=document.getElementById('manual-cel');
+    dCel=mc?mc.value.replace(/\D/g,''):'';
+    if(dCel.length<9){ toast('Ingresa el numero completo del taxista','warn'); return; }
+  } else {
+    var dr=D.drivers.find(function(d){return d.id===selDriver;});
+    if(!dr){ toast('Taxista no encontrado','warn'); return; }
+    dCel=dr.celular.replace(/\D/g,''); dNom=dr.nombre.split(' ')[0];
+  }
+
+  var trip={id:Date.now(),nombre:nombre,celular:celular,origen:origen,destino:destino,fecha:fecha,hora:hora,notas:notas,status:'pending',driverId:selDriver==='manual'?null:selDriver,zona:getZona()};
+  D.trips.push(trip); saveT();
+
+  var ruta='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origen)+'&destination='+encodeURIComponent(destino)+'&travelmode=driving';
+  var msg='Nueva solicitud RutaYa\n---\nPasajero: '+nombre+'\nCelular: '+celular+'\nFecha: '+fl(fecha)+'  Hora: '+hora+'\nRecojo: '+origen+'\nDestino: '+destino+(notas?'\nNotas: '+notas:'')+'\nRuta: '+ruta+'\nResponde CONFIRMO o RECHAZADO.';
+
+  window.open('https://wa.me/51'+dCel+'?text='+encodeURIComponent(msg),'_blank');
+
+  var saldo=D.wallets[cid]||0;
+  if(saldo>=15){ D.wallets[cid]=saldo-15; D.txns.push({id:Date.now()+1,cid:cid,tipo:'out',monto:15,desc:'Viaje a '+destino,fecha:hoyStr()}); saveW(); }
+
+  ['f-origen','f-destino','f-hora','f-nombre','f-cel','f-notas'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('f-fecha').value=hoyStr();
+  selDriver=null;
+  document.querySelectorAll('.dcard').forEach(function(c){c.classList.remove('sel');});
+  document.getElementById('btn-sol').disabled=true;
+  updMap();
+  toast('Solicitud enviada a '+dNom+' por WhatsApp');
+});
+
+// WALLET
+function renderWallet(){
+  document.getElementById('w-amt').textContent=(D.wallets[cid]||0).toFixed(2);
+  document.getElementById('w-id').textContent='ID: '+cid.slice(-8);
+  renderTxns();
+}
+function renderTxns(){
+  var list=document.getElementById('txn-list');
+  var mine=D.txns.filter(function(t){return t.cid===cid;}).slice().reverse().slice(0,10);
+  if(!mine.length){ list.innerHTML='<div class="empty">Sin transacciones aun.</div>'; return; }
+  list.innerHTML=mine.map(function(t){ return '<div class="txn"><div><div class="txn-n">'+(t.tipo==='in'?'+':'-')+' '+t.desc+'</div><div class="txn-d">'+t.fecha+'</div></div><div class="txn-v '+(t.tipo==='in'?'txn-in':'txn-out')+'">'+(t.tipo==='in'?'+':'-')+'S/'+t.monto+'</div></div>'; }).join('');
+}
+document.getElementById('btn-rec').addEventListener('click',function(){ om('m-rec'); });
+document.getElementById('btn-hist').addEventListener('click',renderTxns);
+document.querySelectorAll('.amgrid button').forEach(function(b){ b.addEventListener('click',function(){ document.getElementById('m-inp').value=this.dataset.m; }); });
+document.getElementById('btn-conf-rec').addEventListener('click',function(){
+  var m=parseFloat(document.getElementById('m-inp').value);
+  var met=document.getElementById('m-met').value;
+  if(!m||m<5){ toast('Monto minimo S/5','warn'); return; }
+  D.wallets[cid]=(D.wallets[cid]||0)+m; D.txns.push({id:Date.now(),cid:cid,tipo:'in',monto:m,desc:'Recarga '+met,fecha:hoyStr()}); saveW();
+  cm('m-rec'); renderWallet(); toast('S/'+m+' acreditados en tu billetera');
+});
+document.getElementById('close-rec').addEventListener('click',function(){ cm('m-rec'); });
+
+// AGENDA
+function updStats(){
+  var mt=D.session?D.trips.filter(function(t){return t.driverId===D.session.id;}):D.trips;
+  document.getElementById('st-p').textContent=mt.filter(function(t){return t.status==='pending';}).length;
+  document.getElementById('st-c').textContent=mt.filter(function(t){return t.status==='confirmed';}).length;
+  document.getElementById('st-d').textContent=mt.filter(function(t){return t.status==='done';}).length;
+}
+function renderPBar(){
+  if(!D.session) return;
+  // Verificar estado actual del driver en la BD
+  var drDB = D.drivers.find(function(d){return d.id===D.session.id;});
+  var verified = drDB && drDB.verified;
+  var status = drDB ? drDB.status : 'pending';
+
+  // Si no verificado mostrar pantalla de espera
+  var pendDiv = document.getElementById('pbar-pending');
+  var agendaContent = document.getElementById('agenda-content');
+  if(!verified || status==='pending'){
+    if(pendDiv) pendDiv.style.display='flex';
+    if(agendaContent) agendaContent.style.display='none';
+    // Rellenar datos de espera
+    var pn=document.getElementById('pend-name'); if(pn) pn.textContent=D.session.nombre.split(' ')[0];
+    return;
+  }
+  if(pendDiv) pendDiv.style.display='none';
+  if(agendaContent) agendaContent.style.display='block';
+  var pb=document.getElementById('pbar'); pb.style.display='flex';
+  document.getElementById('p-n').textContent=D.session.nombre;
+  document.getElementById('p-c').textContent='+51 '+D.session.celular;
+  document.getElementById('p-a').textContent=(D.session.auto||'')+(D.session.placa?' · '+D.session.placa:'');
+  var r=drRating(D.session.id); document.getElementById('p-r').textContent=r||'-';
+  var pls={free:'Plan Gratis',basic:'Basico',pro:'Pro'};
+  document.getElementById('p-pl').textContent=pls[D.session.plan]||'Plan Gratis';
+  document.getElementById('p-pl').className='ppl '+(D.session.plan||'free');
+}
+document.getElementById('cal-prev').addEventListener('click',function(){ if(--calM<0){calM=11;calY--;} renderCal(); });
+document.getElementById('cal-next').addEventListener('click',function(){ if(++calM>11){calM=0;calY++;} renderCal(); });
+
+function renderCal(){
+  updStats();
+  document.getElementById('cal-lbl').textContent=MESES[calM]+' '+calY;
+  var grid=document.getElementById('cal-days'); grid.innerHTML='';
+  var fd=new Date(calY,calM,1).getDay(), dm=new Date(calY,calM+1,0).getDate(), dp=new Date(calY,calM,0).getDate();
+  for(var i=0;i<fd;i++) mkCell(grid,dp-fd+1+i,calY,calM-1,true);
+  for(var d=1;d<=dm;d++) mkCell(grid,d,calY,calM,false);
+  for(var x=1;x<=42-fd-dm;x++) mkCell(grid,x,calY,calM+1,true);
+  renderTList(calSel);
+}
+
+function mkCell(grid,day,year,month,other){
+  var cell=document.createElement('div'); cell.className='cday'+(other?' other':'');
+  var ry=year,rm=month; if(rm<0){rm=11;ry--;} if(rm>11){rm=0;ry++;}
+  var ds=ry+'-'+String(rm+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+  if(!other&&ry===HOY.getFullYear()&&rm===HOY.getMonth()&&day===HOY.getDate()) cell.classList.add('today');
+  if(ds===calSel) cell.classList.add('sel');
+  var dn=document.createElement('div'); dn.className='cdn'; dn.textContent=day; cell.appendChild(dn);
+  var mt=D.session?D.trips.filter(function(t){return t.driverId===D.session.id;}):D.trips;
+  mt.filter(function(t){return t.fecha===ds;}).slice(0,2).forEach(function(t){
+    var ev=document.createElement('span'); ev.className='cev '+t.status; ev.textContent=t.hora+' '+t.destino.split(',')[0];
+    ev.addEventListener('click',function(e){ e.stopPropagation(); openViaje(t); }); cell.appendChild(ev);
+  });
+  var ex=mt.filter(function(t){return t.fecha===ds;}).length-2;
+  if(ex>0){ var m=document.createElement('span'); m.style.cssText='font-size:8px;color:var(--muted);'; m.textContent='+'+ex; cell.appendChild(m); }
+  cell.addEventListener('click',function(){ calSel=(calSel===ds)?null:ds; renderCal(); });
+  grid.appendChild(cell);
+}
+
+function renderTList(ds){
+  var list=document.getElementById('trip-list'), lbl=document.getElementById('list-lbl');
+  var mt=D.session?D.trips.filter(function(t){return t.driverId===D.session.id;}):D.trips;
+  var f=ds?mt.filter(function(t){return t.fecha===ds;}).sort(function(a,b){return a.hora.localeCompare(b.hora);}):mt.slice().sort(function(a,b){return a.fecha.localeCompare(b.fecha)||a.hora.localeCompare(b.hora);});
+  lbl.textContent=ds?'Viajes del '+fl(ds):'Todos mis viajes';
+  if(!f.length){ list.innerHTML='<div class="empty">'+(ds?'Sin viajes este dia':'Sin viajes registrados aun.')+'</div>'; return; }
+  list.innerHTML=f.map(function(t){ return '<div class="tcard" data-tid="'+t.id+'"><div class="tc-top"><div class="tc-time">'+t.hora+'</div><span class="badge '+(t.status==='pending'?'b-p':t.status==='confirmed'?'b-c':'b-d')+'">'+(t.status==='pending'?'Pendiente':t.status==='confirmed'?'Confirmado':'Completado')+'</span></div><div class="tc-route"><div class="tc-pt"><div class="da" style="width:8px;height:8px;flex-shrink:0"></div>'+t.origen+'</div><div class="tc-pt"><div class="db" style="width:8px;height:8px;flex-shrink:0"></div>'+t.destino+'</div></div><div class="tc-meta"><div class="tc-mi"><strong>'+t.nombre+'</strong>Pasajero</div><div class="tc-mi"><strong>'+t.celular+'</strong>Cel.</div><div class="tc-mi"><strong>'+fl(t.fecha)+'</strong>Fecha</div>'+(t.notas?'<div class="tc-mi"><strong>'+t.notas+'</strong>Notas</div>':'')+'</div><div class="tc-acts">'+(t.status==='pending'?'<button class="bsm-green" data-a="confirm" data-id="'+t.id+'">Confirmar</button><button class="bsm-red" data-a="reject" data-id="'+t.id+'">Rechazar</button>':'')+(t.status==='confirmed'?'<button class="bsm-dim" data-a="done" data-id="'+t.id+'">Completado</button>':'')+'<button class="bsm-gray" data-a="ruta" data-o="'+t.origen+'" data-d="'+t.destino+'">Ruta</button><button class="bsm-wa" data-a="wa" data-id="'+t.id+'">WA</button></div></div>'; }).join('');
+  list.querySelectorAll('.tcard').forEach(function(card){
+    card.addEventListener('click',function(e){ if(e.target.closest('.tc-acts')) return; var t=D.trips.find(function(x){return x.id===parseInt(card.dataset.tid);}); if(t) openViaje(t); });
+  });
+  list.querySelectorAll('[data-a]').forEach(function(btn){
+    btn.addEventListener('click',function(e){ e.stopPropagation(); var a=this.dataset.a;
+      if(a==='confirm') chStatus(parseInt(this.dataset.id),'confirmed');
+      if(a==='reject'||a==='done') chStatus(parseInt(this.dataset.id),'done');
+      if(a==='ruta') window.open('https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(this.dataset.o)+'&destination='+encodeURIComponent(this.dataset.d)+'&travelmode=driving','_blank');
+      if(a==='wa'){ var t=D.trips.find(function(x){return x.id===parseInt(btn.dataset.id);}); if(t){ var msg='Hola '+t.nombre+' (RutaYa). Tu viaje del '+fl(t.fecha)+' a las '+t.hora+' de '+t.origen+' a '+t.destino+' esta '+(t.status==='confirmed'?'CONFIRMADO':'en revision')+'. Cualquier duda avisame!'; window.open('https://wa.me/51'+t.celular.replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank'); } }
+    });
+  });
+}
+
+function chStatus(id,status){
+  var t=D.trips.find(function(x){return x.id===id;}); if(t){ t.status=status; saveT(); renderCal(); }
+  cm('m-viaje'); toast(status==='confirmed'?'Viaje confirmado':'Completado');
+}
+
+function openViaje(t){
+  var dr=D.drivers.find(function(d){return d.id===t.driverId;});
+  document.getElementById('mv-title').textContent=fl(t.fecha)+' — '+t.hora;
+  document.getElementById('mv-body').innerHTML='<div style="display:flex;flex-direction:column;gap:10px"><div style="background:#0A1828;border-radius:11px;padding:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><div class="da"></div><span style="font-size:13px">'+t.origen+'</span></div><div style="display:flex;align-items:center;gap:8px"><div class="db"></div><span style="font-size:13px">'+t.destino+'</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+ [['Pasajero',t.nombre],['Celular',t.celular],['Fecha',fl(t.fecha)],['Hora',t.hora]].concat(dr?[['Taxista',dr.nombre]]:[]).concat(t.notas?[['Notas',t.notas]]:[]).map(function(x){ return '<div style="background:#0A1828;border-radius:9px;padding:9px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">'+x[0]+'</div><div style="font-size:12px;font-weight:700;margin-top:2px">'+x[1]+'</div></div>'; }).join('') +'</div><div style="display:flex;gap:6px;flex-wrap:wrap"><a href="https://wa.me/51'+t.celular.replace(/\D/g,'')+'" target="_blank" rel="noopener" style="flex:1;padding:10px;background:var(--wa);color:#fff;border-radius:9px;text-align:center;font-weight:700;font-size:12px;text-decoration:none">WhatsApp</a><a href="tel:'+t.celular+'" style="flex:1;padding:10px;background:var(--blue);color:#fff;border-radius:9px;text-align:center;font-weight:700;font-size:12px;text-decoration:none">Llamar</a><button onclick="window.open(\'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(t.origen)+'&destination='+encodeURIComponent(t.destino)+'&travelmode=driving\',\'_blank\')" style="flex:1;padding:10px;background:var(--border);color:var(--text);border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer">Ruta</button></div>'+(t.status==='pending'?'<div style="display:flex;gap:7px"><button onclick="chStatus('+t.id+',\'confirmed\')" style="flex:1;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer">Confirmar</button><button onclick="chStatus('+t.id+',\'done\')" style="flex:1;padding:12px;background:var(--red);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer">Rechazar</button></div>':'')+(t.status==='done'&&!D.ratings.find(function(r){return r.tripId===t.id;})?'<button onclick="cm(\'m-viaje\');openRate('+t.id+')" style="width:100%;padding:11px;background:rgba(245,197,24,.12);color:var(--gold);border:1px solid rgba(245,197,24,.25);border-radius:10px;font-weight:800;font-size:13px;cursor:pointer">Calificar este viaje</button>':'')+'</div>';
+  om('m-viaje');
+}
+document.getElementById('close-viaje').addEventListener('click',function(){ cm('m-viaje'); });
+
+// CALIFICAR
+function openRate(tripId){ rTripId=tripId; rVal=0; var t=D.trips.find(function(x){return x.id===tripId;}); document.getElementById('ri').textContent=t?'Viaje a '+t.destino:''; document.querySelectorAll('.srtn').forEach(function(b){b.textContent='☆';}); document.getElementById('rl').textContent='Toca una estrella'; document.getElementById('rc').value=''; om('m-rate'); }
+document.querySelectorAll('.srtn').forEach(function(btn){ btn.addEventListener('click',function(){ rVal=parseInt(this.dataset.s); document.querySelectorAll('.srtn').forEach(function(b,i){b.textContent=i<rVal?'⭐':'☆';}); var ls=['','Muy malo','Regular','Bueno','Muy bueno','Excelente']; document.getElementById('rl').textContent=ls[rVal]; }); });
+document.getElementById('btn-rate').addEventListener('click',function(){ if(!rVal){ toast('Toca una estrella','warn'); return; } var t=D.trips.find(function(x){return x.id===rTripId;}); if(!t){ cm('m-rate'); return; } D.ratings.push({id:Date.now(),driverId:t.driverId,tripId:t.id,stars:rVal,comment:document.getElementById('rc').value.trim(),fecha:hoyStr()}); saveR(); cm('m-rate'); toast('Gracias por tu calificacion!'); });
+document.getElementById('close-rate').addEventListener('click',function(){ cm('m-rate'); });
+
+// ADMIN
+function renderAdmin(){
+  var tot=D.drivers.length, act=D.drivers.filter(function(d){return d.status==='active';}).length, pend=D.drivers.filter(function(d){return d.status==='pending';}).length;
+  var ing=D.drivers.filter(function(d){return d.pagado&&d.plan!=='free';}).reduce(function(a,d){return a+(d.plan==='pro'?60:30);},0);
+  document.getElementById('astats').innerHTML='<div class="astat"><div class="n">'+tot+'</div><div class="l">Taxistas</div><div class="s">'+act+' activos</div></div><div class="astat"><div class="n" style="color:var(--amber)">'+pend+'</div><div class="l">Por verificar</div></div><div class="astat"><div class="n" style="color:var(--green)">S/'+ing+'</div><div class="l">Ingresos/mes</div></div><div class="astat"><div class="n" style="color:var(--purple)">'+D.trips.length+'</div><div class="l">Total viajes</div></div>';
+  var c=document.getElementById('acontent');
+  if(aTab==='drivers'){
+    if(!D.drivers.length){ c.innerHTML='<div class="empty">Sin taxistas.</div>'; return; }
+    c.innerHTML=D.drivers.map(function(d){ var r=drRating(d.id), sc={active:'var(--green)',pending:'var(--amber)',suspended:'var(--red)'}; return '<div class="drow"><div class="dav2">🚕</div><div class="di2"><div class="dn2">'+d.nombre+' '+(d.verified?'<span style="color:var(--green);font-size:10px">Verificado</span>':'')+'</div><div class="dm">'+d.celular+' | '+(d.auto||'-')+' '+( d.placa||'-')+'<br>'+getZona()+'<br><span style="color:'+(sc[d.status]||'var(--muted)')+'">'+d.status+'</span> | <span style="color:'+(d.pagado?'var(--green)':'var(--amber)')+'">'+(d.pagado?'Pagado':'Debe pago')+'</span>'+(r?' | ⭐'+r:'')+'</div></div><div class="dacts">'+ (!d.verified?'<button class="sbtn sbtn-v" data-a="ver" data-id="'+d.id+'">Verificar</button>':'')+(d.status!=='active'?'<button class="sbtn sbtn-a" data-a="act" data-id="'+d.id+'">Activar</button>':'<button class="sbtn sbtn-s" data-a="sus" data-id="'+d.id+'">Suspender</button>')+'<button class="sbtn sbtn-p" data-a="pay" data-id="'+d.id+'">'+(d.pagado?'Pagado':'Marcar pagado')+'</button></div></div>'; }).join('');
+    c.querySelectorAll('[data-a]').forEach(function(btn){ btn.addEventListener('click',function(){ var id=parseInt(this.dataset.id); var d=D.drivers.find(function(x){return x.id===id;}); if(!d) return; if(this.dataset.a==='ver'){
+          d.verified=true;d.status='active';toast('Taxista verificado y activado');
+          // Notificar al taxista por WhatsApp
+          var msgOk='Hola '+d.nombre.split(' ')[0]+', tu cuenta RutaYa ha sido VERIFICADA y activada. Ya puedes recibir solicitudes de viaje. Bienvenido a la familia RutaYa!';
+          window.open('https://wa.me/51'+d.celular.replace(/\D/g,'')+'?text='+encodeURIComponent(msgOk),'_blank');
+        } if(this.dataset.a==='act'){d.status='active';toast('Activado');} if(this.dataset.a==='sus'){
+          d.status='suspended';d.verified=false;toast('Taxista suspendido');
+          var msgSus='Hola '+d.nombre.split(' ')[0]+', tu cuenta RutaYa ha sido SUSPENDIDA. Para mas informacion contacta al administrador.';
+          window.open('https://wa.me/51'+d.celular.replace(/\D/g,'')+'?text='+encodeURIComponent(msgSus),'_blank');
+        } if(this.dataset.a==='pay'){d.pagado=!d.pagado;toast(d.pagado?'Pagado':'Pendiente');} saveD(); renderAdmin(); }); });
+  }
+  if(aTab==='income'){
+    var pg=D.drivers.filter(function(d){return d.plan!=='free';}); if(!pg.length){ c.innerHTML='<div class="empty">Sin suscripciones aun.</div>'; return; }
+    var tot2=pg.filter(function(d){return d.pagado;}).reduce(function(a,d){return a+(d.plan==='pro'?60:30);},0);
+    var pend2=pg.filter(function(d){return !d.pagado;}).reduce(function(a,d){return a+(d.plan==='pro'?60:30);},0);
+    c.innerHTML=pg.map(function(d){ return '<div class="irow2"><div><div class="in">'+d.nombre+'</div><div class="im">'+d.celular+'</div></div><div style="text-align:right"><div class="ip">S/'+(d.plan==='pro'?60:30)+'/mes</div><div class="is '+(d.pagado?'paid':'due')+'">'+(d.pagado?'Al dia':'Pendiente')+'</div></div></div>'; }).join('')+'<div class="card mt8"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--muted);font-size:13px">Total cobrado</span><span style="font-size:16px;font-weight:900;color:var(--green)">S/'+tot2+'</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--muted);font-size:13px">Por cobrar</span><span style="font-size:16px;font-weight:900;color:var(--amber)">S/'+pend2+'</span></div></div>';
+  }
+  if(aTab==='trips'){
+    var sorted=D.trips.slice().sort(function(a,b){return b.fecha.localeCompare(a.fecha);}); if(!sorted.length){ c.innerHTML='<div class="empty">Sin viajes.</div>'; return; }
+    c.innerHTML=sorted.slice(0,30).map(function(t){ var dr=D.drivers.find(function(d){return d.id===t.driverId;}); return '<div class="tcard"><div class="tc-top"><div style="font-size:12px;font-weight:700;color:var(--soft)">'+fl(t.fecha)+' '+t.hora+'</div><span class="badge '+(t.status==='pending'?'b-p':t.status==='confirmed'?'b-c':'b-d')+'">'+(t.status==='pending'?'Pendiente':t.status==='confirmed'?'Confirmado':'Completado')+'</span></div><div class="tc-route"><div class="tc-pt"><div class="da" style="width:7px;height:7px;flex-shrink:0"></div>'+t.origen+'</div><div class="tc-pt"><div class="db" style="width:7px;height:7px;flex-shrink:0"></div>'+t.destino+'</div></div><div class="tc-meta"><div class="tc-mi"><strong>'+t.nombre+'</strong>Pasajero</div><div class="tc-mi"><strong>'+(dr?dr.nombre:'-')+'</strong>Taxista</div></div></div>'; }).join('');
+  }
+  if(aTab==='ads'){ c.innerHTML='<div class="card"><div class="card-title">Gestion de publicidad</div><div style="font-size:12px;color:var(--muted);line-height:1.7;margin:8px 0 14px">Tarifas: Banner basico S/50/sem · Banner Pro S/150/sem · Marketplace S/200/mes</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"><div style="background:#0A1828;border-radius:10px;padding:11px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--purple)">1</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Anunciante activo</div></div><div style="background:#0A1828;border-radius:10px;padding:11px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--green)">S/50</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Esta semana</div></div></div><div class="irow2" style="background:#0A1828"><div><div class="in">Burger Palace</div><div class="im">Banner principal</div></div><div style="text-align:right"><div class="ip">S/50</div><div class="is paid">Pagado</div></div></div></div>'; }
+}
+document.querySelectorAll('.atab').forEach(function(tab){ tab.addEventListener('click',function(){ document.querySelectorAll('.atab').forEach(function(t){t.classList.remove('active');}); this.classList.add('active'); aTab=this.dataset.tab; renderAdmin(); }); });
+
+// SETTINGS
+document.getElementById('btn-cfg').addEventListener('click',function(){ document.getElementById('cfg-c').value=D.config.cel||''; document.getElementById('cfg-n').value=D.config.nombre||''; om('m-cfg'); });
+document.getElementById('btn-save-cfg').addEventListener('click',function(){ D.config.cel=document.getElementById('cfg-c').value.replace(/\D/g,''); D.config.nombre=document.getElementById('cfg-n').value.trim()||'Taxista'; saveCfg(); cm('m-cfg'); toast('Configuracion guardada'); });
+document.getElementById('btn-adm-log').addEventListener('click',function(){ var p=document.getElementById('adm-p').value; if(p===ADMIN_PASS){ D.isAdmin=true; save('admin',true); updUI(); cm('m-cfg'); toast('Bienvenido Estrada'); setTimeout(function(){goTo('admin');},600); } else { toast('Contrasena incorrecta','warn'); } });
+document.getElementById('btn-logout').addEventListener('click',function(){ D.session=null; D.isAdmin=false; localStorage.removeItem('ry2_session'); localStorage.removeItem('ry2_admin'); updUI(); cm('m-cfg'); var pb=document.getElementById('pbar'); if(pb) pb.style.display='none'; goTo('landing'); toast('Sesion cerrada'); });
+document.getElementById('close-cfg').addEventListener('click',function(){ cm('m-cfg'); });
+
+// ANUNCIAR
+document.getElementById('btn-ad').addEventListener('click',function(){ var n=document.getElementById('ad-n').value.trim(); var c=document.getElementById('ad-c').value.trim(); if(!n||!c){ toast('Completa los datos','warn'); return; } var adm=D.config.cel||'987000001'; var msg='Hola RutaYa, quiero anunciarme: '+n+'. Mi WhatsApp: '+c; window.open('https://wa.me/51'+adm.replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank'); cm('m-ad'); toast('Mensaje enviado al equipo RutaYa'); });
+document.getElementById('close-ad').addEventListener('click',function(){ cm('m-ad'); });
+
+// Listeners pantalla pendiente
+document.addEventListener('click', function(e) {
+  if(e.target && e.target.id==='btn-contactar-admin'){
+    var adminCel=D.config.cel||'';
+    if(!adminCel){ toast('Configura el numero del admin en Ajustes','warn'); return; }
+    var nombre=D.session?D.session.nombre:'Taxista';
+    var msg='Hola, soy '+nombre+'. Me registre en RutaYa y quiero saber el estado de mi verificacion. Mi celular: '+(D.session?D.session.celular:'');
+    window.open('https://wa.me/51'+adminCel.replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');
+  }
+  if(e.target && e.target.id==='btn-refresh-status'){
+    // Recargar datos y reverificar
+    var drDB=D.drivers.find(function(d){return D.session&&d.id===D.session.id;});
+    if(drDB&&drDB.verified){
+      document.getElementById('pbar-pending').style.display='none';
+      document.getElementById('agenda-content').style.display='block';
+      renderCal(); renderPBar();
+      toast('Tu cuenta ya fue verificada. Bienvenido!');
+    } else {
+      toast('Tu cuenta aun esta en revision. Te avisaremos por WhatsApp.','warn');
+    }
+  }
+});
+
+// INIT
+(function(){
+  updUI();
+  var fi=document.getElementById('f-fecha'); fi.min=hoyStr(); fi.value=hoyStr();
+  var zona=getZona(); document.getElementById('zn').textContent=zona;
+  var n=D.drivers.filter(function(d){return d.status==='active'&&d.verified&&d.zona===zona;}).length;
+  document.getElementById('zs').textContent=n>0?n+' taxista'+(n>1?'s':'')+' disponible'+(n>1?'s':''):'Elige tu zona para ver taxistas';
+  if(D.isAdmin){ document.getElementById('nav-admin').style.display='flex'; document.getElementById('pill-admin').style.display='inline-block'; }
+  if(D.session){ document.getElementById('pill-user').style.display='inline-block'; document.getElementById('pill-user').textContent=D.session.nombre.split(' ')[0]; }
+})();
+</script>
+</body>
+</html>
