@@ -320,24 +320,46 @@ textarea{resize:vertical;min-height:68px;}
       <div class="card">
         <div class="card-title">A donde vas?</div>
         <div class="card-sub">Elige un taxista y te confirmamos por WhatsApp.</div>
+
+        <!-- OBLIGATORIOS -->
         <div class="field">
-          <label>PUNTO DE RECOJO</label>
-          <div class="ibox"><div class="da"></div><input type="text" id="f-origen" placeholder="Donde te recojo?"><button class="gps-btn" id="gps-o">📍</button></div>
+          <label>NOMBRE COMPLETO <span style="color:var(--red)">*</span></label>
+          <input type="text" id="f-nombre" placeholder="Pedro Garcia Lopez">
         </div>
-        <div class="vln"></div>
+        <div class="row2">
+          <div class="field">
+            <label>CELULAR <span style="color:var(--red)">*</span></label>
+            <input type="tel" id="f-cel" placeholder="999 888 777" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>DNI <span style="color:var(--red)">*</span></label>
+            <input type="tel" id="f-dni" placeholder="12345678" inputmode="numeric" maxlength="8">
+          </div>
+        </div>
         <div class="field">
-          <label>DESTINO</label>
-          <div class="ibox"><div class="db"></div><input type="text" id="f-destino" placeholder="A donde vas?"><button class="gps-btn" id="gps-d">📍</button></div>
+          <label>PUNTO DE PARTIDA <span style="color:var(--red)">*</span></label>
+          <div class="ibox"><div class="da"></div><input type="text" id="f-origen" placeholder="Desde donde partes?"><button class="gps-btn" id="gps-o">📍</button></div>
+        </div>
+
+        <!-- SEPARADOR -->
+        <div style="display:flex;align-items:center;gap:8px;margin:10px 0;">
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+          <span style="font-size:10px;color:var(--muted);font-weight:700;white-space:nowrap">OPCIONALES</span>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+        </div>
+
+        <div class="field">
+          <label>DESTINO <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none">(si ya lo sabes)</span></label>
+          <div class="ibox"><div class="db"></div><input type="text" id="f-destino" placeholder="A donde vas? (opcional)"><button class="gps-btn" id="gps-d">📍</button></div>
         </div>
         <div class="row2">
           <div class="field"><label>FECHA</label><input type="date" id="f-fecha"></div>
           <div class="field"><label>HORA</label><input type="time" id="f-hora"></div>
         </div>
-        <div class="row2">
-          <div class="field"><label>TU NOMBRE</label><input type="text" id="f-nombre" placeholder="Nombre completo"></div>
-          <div class="field"><label>TU CELULAR</label><input type="tel" id="f-cel" placeholder="999 888 777"></div>
+        <div class="field">
+          <label>NOTAS <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none">(equipaje, personas, etc.)</span></label>
+          <textarea id="f-notas" placeholder="Opcional — equipaje, numero de personas, instrucciones especiales..."></textarea>
         </div>
-        <div class="field"><label>NOTAS</label><textarea id="f-notas" placeholder="Personas, equipaje, instrucciones..."></textarea></div>
       </div>
       <div class="slabel">ELIGE TU TAXISTA</div>
       <div id="dpicker"></div>
@@ -773,12 +795,61 @@ function updMap(){
   var d=document.getElementById('f-destino').value.trim();
   var box=document.getElementById('map-box'), ph=document.getElementById('map-ph');
   var iframe=box.querySelector('iframe'), lnk=document.getElementById('map-lnk');
-  if(!o&&!d){ ph.style.display='flex'; if(iframe)iframe.remove(); if(lnk)lnk.remove(); return; }
+  var badge=document.getElementById('map-badge');
+
+  if(!o&&!d){
+    ph.style.display='flex';
+    if(iframe)iframe.remove();
+    if(lnk)lnk.remove();
+    if(badge)badge.remove();
+    return;
+  }
   ph.style.display='none';
-  if(!iframe){ iframe=document.createElement('iframe'); iframe.style.cssText='width:100%;height:100%;border:none;'; iframe.loading='lazy'; box.appendChild(iframe); }
-  iframe.src='https://maps.google.com/maps?q='+encodeURIComponent(d||o)+'&output=embed&hl=es&z=14';
-  if(!lnk){ lnk=document.createElement('a'); lnk.id='map-lnk'; lnk.target='_blank'; lnk.rel='noopener'; lnk.style.cssText='position:absolute;bottom:7px;right:7px;background:var(--neon);color:#000;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;text-decoration:none;z-index:10;'; lnk.textContent='Abrir en Maps'; box.appendChild(lnk); }
-  lnk.href=(o&&d)?'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(o)+'&destination='+encodeURIComponent(d)+'&travelmode=driving':'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o||d);
+
+  if(!iframe){
+    iframe=document.createElement('iframe');
+    iframe.style.cssText='width:100%;height:100%;border:none;';
+    iframe.loading='lazy';
+    box.appendChild(iframe);
+  }
+
+  // Si hay ORIGEN y DESTINO: trazar ruta completa
+  if(o && d){
+    // Usar embed de directions de Google Maps
+    iframe.src='https://www.google.com/maps/embed/v1/directions?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&origin='+encodeURIComponent(o)+'&destination='+encodeURIComponent(d)+'&mode=driving&language=es';
+    // Badge indicador de ruta
+    if(!badge){
+      badge=document.createElement('div');
+      badge.id='map-badge';
+      badge.style.cssText='position:absolute;top:8px;left:8px;background:rgba(0,0,0,.75);color:#fff;padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;z-index:10;display:flex;align-items:center;gap:5px;backdrop-filter:blur(4px);';
+      badge.innerHTML='<span style="color:var(--neon)">●</span> Ruta trazada';
+      box.appendChild(badge);
+    } else {
+      badge.innerHTML='<span style="color:var(--neon)">●</span> Ruta trazada';
+      badge.style.display='flex';
+    }
+  } else {
+    // Solo origen: mostrar ubicacion
+    iframe.src='https://maps.google.com/maps?q='+encodeURIComponent(o||d)+'&output=embed&hl=es&z=15';
+    if(badge) badge.style.display='none';
+  }
+
+  // Boton abrir en Maps
+  if(!lnk){
+    lnk=document.createElement('a');
+    lnk.id='map-lnk';
+    lnk.target='_blank';
+    lnk.rel='noopener';
+    lnk.style.cssText='position:absolute;bottom:7px;right:7px;background:var(--neon);color:#000;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;text-decoration:none;z-index:10;';
+    box.appendChild(lnk);
+  }
+  if(o && d){
+    lnk.textContent='↗ Ver ruta completa';
+    lnk.href='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(o)+'&destination='+encodeURIComponent(d)+'&travelmode=driving';
+  } else {
+    lnk.textContent='↗ Abrir en Maps';
+    lnk.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o||d);
+  }
 }
 document.getElementById('f-origen').addEventListener('input',function(){ clearTimeout(mapT); mapT=setTimeout(updMap,700); });
 document.getElementById('f-destino').addEventListener('input',function(){ clearTimeout(mapT); mapT=setTimeout(updMap,700); });
@@ -860,12 +931,11 @@ document.getElementById('btn-sol').addEventListener('click',function(){
   var celular = document.getElementById('f-cel').value.trim();
   var notas   = document.getElementById('f-notas').value.trim();
 
-  if(!origen)  { toast('Ingresa el punto de recojo','warn'); return; }
-  if(!destino) { toast('Ingresa el destino','warn'); return; }
-  if(!fecha)   { toast('Selecciona la fecha','warn'); return; }
-  if(!hora)    { toast('Selecciona la hora','warn'); return; }
-  if(!nombre)  { toast('Ingresa tu nombre','warn'); return; }
-  if(!celular) { toast('Ingresa tu celular','warn'); return; }
+  var dni = document.getElementById('f-dni') ? document.getElementById('f-dni').value.trim() : '';
+  if(!nombre)  { toast('Ingresa tu nombre completo','warn'); return; }
+  if(!celular) { toast('Ingresa tu numero de celular','warn'); return; }
+  if(!dni || dni.length < 8) { toast('Ingresa tu DNI (8 digitos)','warn'); return; }
+  if(!origen)  { toast('Ingresa el punto de partida','warn'); return; }
   if(!selDriver){ toast('Elige un taxista de la lista','warn'); return; }
 
   var dCel='', dNom='Taxista';
@@ -883,14 +953,14 @@ document.getElementById('btn-sol').addEventListener('click',function(){
   D.trips.push(trip); saveT();
 
   var ruta='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origen)+'&destination='+encodeURIComponent(destino)+'&travelmode=driving';
-  var msg='Nueva solicitud RutaYa\n---\nPasajero: '+nombre+'\nCelular: '+celular+'\nFecha: '+fl(fecha)+'  Hora: '+hora+'\nRecojo: '+origen+'\nDestino: '+destino+(notas?'\nNotas: '+notas:'')+'\nRuta: '+ruta+'\nResponde CONFIRMO o RECHAZADO.';
+  var msg='Nueva solicitud RutaYa\n---\nPasajero: '+nombre+'\nCelular: '+celular+'\nDNI: '+dni+'\nFecha: '+(fecha?fl(fecha):'-')+'  Hora: '+(hora||'-')+'\nPartida: '+origen+(destino?'\nDestino: '+destino:'')+(notas?'\nNotas: '+notas:'')+'\nRuta: '+ruta+'\nResponde CONFIRMO o RECHAZADO.';
 
   window.open('https://wa.me/51'+dCel+'?text='+encodeURIComponent(msg),'_blank');
 
   var saldo=D.wallets[cid]||0;
   if(saldo>=15){ D.wallets[cid]=saldo-15; D.txns.push({id:Date.now()+1,cid:cid,tipo:'out',monto:15,desc:'Viaje a '+destino,fecha:hoyStr()}); saveW(); }
 
-  ['f-origen','f-destino','f-hora','f-nombre','f-cel','f-notas'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  ['f-origen','f-destino','f-hora','f-nombre','f-cel','f-dni','f-notas'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('f-fecha').value=hoyStr();
   selDriver=null;
   document.querySelectorAll('.dcard').forEach(function(c){c.classList.remove('sel');});
