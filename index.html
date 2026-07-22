@@ -80,8 +80,18 @@ textarea{resize:vertical;min-height:68px;}
 .b-p{background:rgba(245,158,11,.15);color:var(--amber);}
 .b-c{background:rgba(30,144,255,.15);color:var(--blue);}
 .b-d{background:rgba(90,122,150,.1);color:var(--muted);}
-#map-box{background:#0A1828;border:1px solid var(--border);border-radius:12px;overflow:hidden;height:170px;position:relative;margin-bottom:12px;}
+#map-box{background:#0A1828;border:1px solid var(--border);border-radius:12px;overflow:hidden;height:240px;position:relative;margin-bottom:12px;}
 .map-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:12px;}
+#map-mode-bar{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:4px;background:rgba(0,0,0,.75);border-radius:20px;padding:4px;backdrop-filter:blur(6px);}
+.map-mode-btn{padding:5px 12px;border-radius:16px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:10px;font-weight:800;transition:all .2s;background:transparent;color:rgba(255,255,255,.5);}
+.map-mode-btn.active{background:var(--neon);color:#000;}
+#map-pick-hint{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(0,0,0,.8);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;backdrop-filter:blur(4px);display:none;pointer-events:none;}
+#map-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:15;pointer-events:none;display:none;width:40px;height:40px;}
+#map-crosshair::before,#map-crosshair::after{content:'';position:absolute;background:var(--neon);}
+#map-crosshair::before{width:2px;height:100%;left:50%;transform:translateX(-50%);}
+#map-crosshair::after{height:2px;width:100%;top:50%;transform:translateY(-50%);}
+#map-crosshair-dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:var(--neon);z-index:16;pointer-events:none;display:none;}
+#map-confirm-dest{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);z-index:20;background:var(--green);color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:'Inter',sans-serif;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;display:none;box-shadow:0 4px 12px rgba(0,0,0,.3);}
 /* HERO */
 #sc-landing{padding:0;}
 .hero{min-height:55vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px 20px 28px;background:radial-gradient(ellipse at 30% 20%,rgba(0,212,255,.1) 0%,transparent 55%),linear-gradient(180deg,#0D1E35 0%,var(--bg) 100%);}
@@ -316,7 +326,21 @@ textarea{resize:vertical;min-height:68px;}
         <div class="zi"><div class="zn" id="zn">Lima, Peru</div><div class="zs" id="zs">Cargando taxistas...</div></div>
         <div class="zc">Cambiar</div>
       </div>
-      <div id="map-box"><div class="map-ph" id="map-ph"><span style="font-size:26px;opacity:.15">🗺️</span><span>El mapa aparece aqui</span></div></div>
+      <div id="map-box">
+        <div class="map-ph" id="map-ph"><span style="font-size:28px;opacity:.15">🗺️</span><span>Ingresa tu punto de partida</span><span style="font-size:10px;opacity:.6">El mapa aparecera aqui</span></div>
+        <!-- Barra de modos -->
+        <div id="map-mode-bar" style="display:none">
+          <button class="map-mode-btn active" id="mode-ver" onclick="setMapMode('ver')">👁 Ver</button>
+          <button class="map-mode-btn" id="mode-dest" onclick="setMapMode('dest')">🎯 Marcar destino</button>
+        </div>
+        <!-- Crosshair para marcar destino -->
+        <div id="map-crosshair"></div>
+        <div id="map-crosshair-dot"></div>
+        <!-- Hint -->
+        <div id="map-pick-hint">Centra el mapa en tu destino y confirma</div>
+        <!-- Boton confirmar destino -->
+        <button id="map-confirm-dest" onclick="confirmarDestinoMapa()">✓ Confirmar este destino</button>
+      </div>
       <div class="card">
         <div class="card-title">A donde vas?</div>
         <div class="card-sub">Elige un taxista y te confirmamos por WhatsApp.</div>
@@ -349,8 +373,12 @@ textarea{resize:vertical;min-height:68px;}
         </div>
 
         <div class="field">
-          <label>DESTINO <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none">(si ya lo sabes)</span></label>
-          <div class="ibox"><div class="db"></div><input type="text" id="f-destino" placeholder="A donde vas? (opcional)"><button class="gps-btn" id="gps-d">📍</button></div>
+          <label>DESTINO <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none">(escribe o marca en el mapa)</span></label>
+          <div class="ibox"><div class="db"></div><input type="text" id="f-destino" placeholder="Escribe o toca el mapa abajo"><button class="gps-btn" id="gps-d" title="Usar mi ubicacion actual como destino">📍</button><button id="btn-pick-map" style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;background:rgba(245,158,11,.15);color:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;" title="Marcar destino en el mapa">🎯</button></div>
+          <div id="dest-selected" style="display:none;margin-top:6px;padding:7px 10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;font-size:11px;color:var(--amber);font-weight:700;">
+            <span id="dest-selected-txt"></span>
+            <button onclick="clearDestino()" style="background:none;border:none;color:var(--amber);cursor:pointer;margin-left:6px;font-size:13px;">✕</button>
+          </div>
         </div>
         <div class="row2">
           <div class="field"><label>FECHA</label><input type="date" id="f-fecha"></div>
@@ -790,67 +818,151 @@ document.getElementById('gps-o').addEventListener('click',function(){ detectGPS(
 document.getElementById('gps-d').addEventListener('click',function(){ detectGPS('f-destino','gps-d'); });
 
 // MAPA
+var mapMode = 'ver'; // 'ver' o 'dest'
+var mapCenter = null; // {lat, lng} del centro actual del mapa embebido
+
 function updMap(){
   var o=document.getElementById('f-origen').value.trim();
   var d=document.getElementById('f-destino').value.trim();
   var box=document.getElementById('map-box'), ph=document.getElementById('map-ph');
   var iframe=box.querySelector('iframe'), lnk=document.getElementById('map-lnk');
-  var badge=document.getElementById('map-badge');
+  var modeBar=document.getElementById('map-mode-bar');
 
   if(!o&&!d){
     ph.style.display='flex';
     if(iframe)iframe.remove();
     if(lnk)lnk.remove();
-    if(badge)badge.remove();
+    if(modeBar) modeBar.style.display='none';
+    setMapMode('ver');
     return;
   }
   ph.style.display='none';
+  if(modeBar) modeBar.style.display='flex';
 
   if(!iframe){
     iframe=document.createElement('iframe');
-    iframe.style.cssText='width:100%;height:100%;border:none;';
+    iframe.id='map-iframe';
+    iframe.style.cssText='width:100%;height:100%;border:none;position:absolute;inset:0;';
     iframe.loading='lazy';
-    box.appendChild(iframe);
+    // Insertar antes del mode-bar para que quede detras
+    box.insertBefore(iframe, modeBar);
   }
 
-  // Si hay ORIGEN y DESTINO: trazar ruta completa
   if(o && d){
-    // Usar embed de directions de Google Maps
+    // RUTA TRAZADA: usar Google Maps Directions embed
     iframe.src='https://www.google.com/maps/embed/v1/directions?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&origin='+encodeURIComponent(o)+'&destination='+encodeURIComponent(d)+'&mode=driving&language=es';
-    // Badge indicador de ruta
+    // Indicador visual de ruta
+    var badge=document.getElementById('map-badge');
     if(!badge){
       badge=document.createElement('div');
       badge.id='map-badge';
-      badge.style.cssText='position:absolute;top:8px;left:8px;background:rgba(0,0,0,.75);color:#fff;padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;z-index:10;display:flex;align-items:center;gap:5px;backdrop-filter:blur(4px);';
-      badge.innerHTML='<span style="color:var(--neon)">●</span> Ruta trazada';
+      badge.style.cssText='position:absolute;bottom:38px;left:8px;background:rgba(0,212,255,.9);color:#000;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;z-index:20;pointer-events:none;';
       box.appendChild(badge);
-    } else {
-      badge.innerHTML='<span style="color:var(--neon)">●</span> Ruta trazada';
-      badge.style.display='flex';
     }
+    badge.textContent='✓ Ruta trazada';
+    badge.style.display='block';
   } else {
-    // Solo origen: mostrar ubicacion
-    iframe.src='https://maps.google.com/maps?q='+encodeURIComponent(o||d)+'&output=embed&hl=es&z=15';
+    // Solo origen
+    iframe.src='https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q='+encodeURIComponent(o)+'&language=es';
+    var badge=document.getElementById('map-badge');
     if(badge) badge.style.display='none';
   }
 
-  // Boton abrir en Maps
   if(!lnk){
     lnk=document.createElement('a');
     lnk.id='map-lnk';
-    lnk.target='_blank';
-    lnk.rel='noopener';
-    lnk.style.cssText='position:absolute;bottom:7px;right:7px;background:var(--neon);color:#000;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;text-decoration:none;z-index:10;';
+    lnk.target='_blank'; lnk.rel='noopener';
+    lnk.style.cssText='position:absolute;bottom:7px;right:7px;background:var(--neon);color:#000;padding:5px 12px;border-radius:8px;font-size:10px;font-weight:800;text-decoration:none;z-index:20;';
     box.appendChild(lnk);
   }
   if(o && d){
-    lnk.textContent='↗ Ver ruta completa';
+    lnk.textContent='↗ Ruta completa';
     lnk.href='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(o)+'&destination='+encodeURIComponent(d)+'&travelmode=driving';
   } else {
-    lnk.textContent='↗ Abrir en Maps';
+    lnk.textContent='↗ Ver en Maps';
     lnk.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o||d);
   }
 }
+
+function setMapMode(mode){
+  mapMode = mode;
+  var ch=document.getElementById('map-crosshair');
+  var chd=document.getElementById('map-crosshair-dot');
+  var hint=document.getElementById('map-pick-hint');
+  var confirmBtn=document.getElementById('map-confirm-dest');
+  var modeVer=document.getElementById('mode-ver');
+  var modeDest=document.getElementById('mode-dest');
+
+  if(mode==='dest'){
+    // Activar modo marcar destino
+    if(ch) ch.style.display='block';
+    if(chd) chd.style.display='block';
+    if(hint) hint.style.display='block';
+    if(confirmBtn) confirmBtn.style.display='block';
+    if(modeVer) modeVer.classList.remove('active');
+    if(modeDest) modeDest.classList.add('active');
+    // Cambiar iframe a mapa navegable de Google Maps normal
+    var o=document.getElementById('f-origen').value.trim();
+    var iframe=document.getElementById('map-iframe');
+    if(iframe && o){
+      // Abrir Google Maps en modo busqueda para que el usuario navegue
+      iframe.src='https://maps.google.com/maps?q='+encodeURIComponent(o)+'&output=embed&hl=es&z=15';
+    }
+    toast('Navega el mapa al destino y toca Confirmar','warn');
+  } else {
+    // Modo ver normal
+    if(ch) ch.style.display='none';
+    if(chd) chd.style.display='none';
+    if(hint) hint.style.display='none';
+    if(confirmBtn) confirmBtn.style.display='none';
+    if(modeVer) modeVer.classList.add('active');
+    if(modeDest) modeDest.classList.remove('active');
+    updMap();
+  }
+}
+
+function confirmarDestinoMapa(){
+  // El usuario confirma — pedimos que escriba el nombre del lugar
+  // ya que no podemos leer el centro del iframe por politica CORS
+  var o=document.getElementById('f-origen').value.trim();
+  setMapMode('ver');
+  // Abrir Google Maps real para que copie la direccion
+  var destInput = prompt('Escribe el nombre del destino que ves en el mapa:');
+  if(destInput && destInput.trim()){
+    document.getElementById('f-destino').value = destInput.trim();
+    var ds = document.getElementById('dest-selected');
+    var dsTxt = document.getElementById('dest-selected-txt');
+    if(ds) ds.style.display='block';
+    if(dsTxt) dsTxt.textContent = destInput.trim();
+    updMap();
+    toast('Destino establecido: '+destInput.trim());
+  }
+}
+
+function clearDestino(){
+  document.getElementById('f-destino').value='';
+  var ds=document.getElementById('dest-selected');
+  if(ds) ds.style.display='none';
+  updMap();
+}
+
+// Boton 🎯 del campo destino
+document.addEventListener('click', function(e){
+  if(e.target && e.target.id==='btn-pick-map'){
+    var o=document.getElementById('f-origen').value.trim();
+    if(!o){ toast('Primero ingresa tu punto de partida','warn'); return; }
+    var modeBar=document.getElementById('map-mode-bar');
+    if(modeBar && modeBar.style.display==='none') {
+      // Forzar mostrar mapa primero
+      updMap();
+      setTimeout(function(){ setMapMode('dest'); }, 400);
+    } else {
+      setMapMode('dest');
+    }
+    // Scroll al mapa
+    document.getElementById('map-box').scrollIntoView({behavior:'smooth',block:'center'});
+  }
+});
 document.getElementById('f-origen').addEventListener('input',function(){ clearTimeout(mapT); mapT=setTimeout(updMap,700); });
 document.getElementById('f-destino').addEventListener('input',function(){ clearTimeout(mapT); mapT=setTimeout(updMap,700); });
 
