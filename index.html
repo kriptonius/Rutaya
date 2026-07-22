@@ -81,6 +81,12 @@ textarea{resize:vertical;min-height:68px;}
 .b-c{background:rgba(30,144,255,.15);color:var(--blue);}
 .b-d{background:rgba(90,122,150,.1);color:var(--muted);}
 #map-box{background:#0A1828;border:1px solid var(--border);border-radius:12px;overflow:hidden;height:240px;position:relative;margin-bottom:12px;}
+#map-box.fullscreen{position:fixed;inset:0;z-index:600;border-radius:0;height:100vh;width:100vw;}
+#map-expand-btn{position:absolute;top:8px;right:8px;z-index:25;width:32px;height:32px;background:rgba(0,0,0,.75);border:none;border-radius:8px;color:#fff;font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+#map-expand-btn.show{display:flex;}
+#map-close-fs{position:absolute;top:12px;left:12px;z-index:30;background:rgba(0,0,0,.85);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer;display:none;gap:6px;align-items:center;backdrop-filter:blur(4px);}
+#map-close-fs.show{display:flex;}
+#dest-live-badge{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:25;background:rgba(0,0,0,.8);color:#fff;padding:5px 12px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;display:none;pointer-events:none;backdrop-filter:blur(4px);}
 .map-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:12px;}
 #map-mode-bar{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:4px;background:rgba(0,0,0,.75);border-radius:20px;padding:4px;backdrop-filter:blur(6px);}
 .map-mode-btn{padding:5px 12px;border-radius:16px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:10px;font-weight:800;transition:all .2s;background:transparent;color:rgba(255,255,255,.5);}
@@ -327,19 +333,28 @@ textarea{resize:vertical;min-height:68px;}
         <div class="zc">Cambiar</div>
       </div>
       <div id="map-box">
-        <div class="map-ph" id="map-ph"><span style="font-size:28px;opacity:.15">🗺️</span><span>Ingresa tu punto de partida</span><span style="font-size:10px;opacity:.6">El mapa aparecera aqui</span></div>
-        <!-- Barra de modos -->
+        <div class="map-ph" id="map-ph">
+          <span style="font-size:28px;opacity:.15">🗺️</span>
+          <span>Ingresa tu punto de partida</span>
+          <span style="font-size:10px;opacity:.6">El mapa aparecerá aquí</span>
+        </div>
+        <!-- Badge destino en vivo -->
+        <div id="dest-live-badge"></div>
+        <!-- Badge ruta trazada -->
+        <div id="map-badge" style="display:none;position:absolute;bottom:38px;left:8px;background:rgba(0,212,255,.9);color:#000;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;z-index:20;pointer-events:none;"></div>
+        <!-- Barra modos -->
         <div id="map-mode-bar" style="display:none">
           <button class="map-mode-btn active" id="mode-ver" onclick="setMapMode('ver')">👁 Ver</button>
           <button class="map-mode-btn" id="mode-dest" onclick="setMapMode('dest')">🎯 Marcar destino</button>
         </div>
-        <!-- Crosshair para marcar destino -->
+        <!-- Crosshair -->
         <div id="map-crosshair"></div>
         <div id="map-crosshair-dot"></div>
-        <!-- Hint -->
-        <div id="map-pick-hint">Centra el mapa en tu destino y confirma</div>
-        <!-- Boton confirmar destino -->
-        <button id="map-confirm-dest" onclick="confirmarDestinoMapa()">✓ Confirmar este destino</button>
+        <div id="map-pick-hint">Navega al destino y confirma</div>
+        <button id="map-confirm-dest" onclick="confirmarDestinoMapa()">✓ Confirmar destino</button>
+        <!-- Expandir / cerrar fullscreen -->
+        <button id="map-expand-btn" onclick="toggleMapFS()" title="Pantalla completa">⛶</button>
+        <button id="map-close-fs" onclick="toggleMapFS()">✕ Cerrar mapa</button>
       </div>
       <div class="card">
         <div class="card-title">A donde vas?</div>
@@ -374,7 +389,7 @@ textarea{resize:vertical;min-height:68px;}
 
         <div class="field">
           <label>DESTINO <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none">(escribe o marca en el mapa)</span></label>
-          <div class="ibox"><div class="db"></div><input type="text" id="f-destino" placeholder="Escribe o toca el mapa abajo"><button class="gps-btn" id="gps-d" title="Usar mi ubicacion actual como destino">📍</button><button id="btn-pick-map" style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;background:rgba(245,158,11,.15);color:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;" title="Marcar destino en el mapa">🎯</button></div>
+          <div class="ibox"><div class="db"></div><input type="text" id="f-destino" placeholder="Ej: Pichari, Cusco..." oninput="onDestinoInput(this.value)"><button class="gps-btn" id="gps-d" title="Usar mi ubicacion actual como destino">📍</button><button id="btn-pick-map" style="width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;background:rgba(245,158,11,.15);color:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;" title="Marcar destino en el mapa">🎯</button></div>
           <div id="dest-selected" style="display:none;margin-top:6px;padding:7px 10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;font-size:11px;color:var(--amber);font-weight:700;">
             <span id="dest-selected-txt"></span>
             <button onclick="clearDestino()" style="background:none;border:none;color:var(--amber);cursor:pointer;margin-left:6px;font-size:13px;">✕</button>
@@ -818,70 +833,114 @@ document.getElementById('gps-o').addEventListener('click',function(){ detectGPS(
 document.getElementById('gps-d').addEventListener('click',function(){ detectGPS('f-destino','gps-d'); });
 
 // MAPA
-var mapMode = 'ver'; // 'ver' o 'dest'
-var mapCenter = null; // {lat, lng} del centro actual del mapa embebido
+var mapMode = 'ver';
+var mapCenter = null;
+var destDebounce = null;
+var mapIsFS = false;
+
+// Debounce al escribir destino
+function onDestinoInput(val){
+  clearTimeout(destDebounce);
+  var badge = document.getElementById('dest-live-badge');
+  if(val.trim().length < 2){
+    if(badge) badge.style.display='none';
+    updMap(); return;
+  }
+  if(badge){ badge.textContent = '🔍 Buscando: '+val.trim()+'...'; badge.style.display='block'; }
+  destDebounce = setTimeout(function(){
+    updMap();
+    var d = document.getElementById('dest-selected');
+    var dTxt = document.getElementById('dest-selected-txt');
+    if(val.trim() && d && dTxt){ d.style.display='block'; dTxt.textContent=val.trim(); }
+    if(badge) badge.style.display='none';
+  }, 800);
+}
+
+// Toggle pantalla completa del mapa
+function toggleMapFS(){
+  var box = document.getElementById('map-box');
+  var expandBtn = document.getElementById('map-expand-btn');
+  var closeBtn = document.getElementById('map-close-fs');
+  mapIsFS = !mapIsFS;
+  if(mapIsFS){
+    box.classList.add('fullscreen');
+    if(expandBtn) expandBtn.style.display='none';
+    if(closeBtn){ closeBtn.classList.add('show'); }
+    document.body.style.overflow='hidden';
+  } else {
+    box.classList.remove('fullscreen');
+    if(expandBtn) expandBtn.classList.add('show');
+    if(closeBtn){ closeBtn.classList.remove('show'); }
+    document.body.style.overflow='';
+  }
+}
 
 function updMap(){
-  var o=document.getElementById('f-origen').value.trim();
-  var d=document.getElementById('f-destino').value.trim();
-  var box=document.getElementById('map-box'), ph=document.getElementById('map-ph');
-  var iframe=box.querySelector('iframe'), lnk=document.getElementById('map-lnk');
-  var modeBar=document.getElementById('map-mode-bar');
+  var o = document.getElementById('f-origen').value.trim();
+  var d = document.getElementById('f-destino').value.trim();
+  var box = document.getElementById('map-box');
+  var ph  = document.getElementById('map-ph');
+  var modeBar    = document.getElementById('map-mode-bar');
+  var expandBtn  = document.getElementById('map-expand-btn');
+  var badge      = document.getElementById('map-badge');
+  var iframe     = document.getElementById('map-iframe');
 
-  if(!o&&!d){
+  // Sin datos: mostrar placeholder
+  if(!o && !d){
     ph.style.display='flex';
-    if(iframe)iframe.remove();
-    if(lnk)lnk.remove();
+    if(iframe) iframe.style.display='none';
     if(modeBar) modeBar.style.display='none';
-    setMapMode('ver');
+    if(expandBtn) expandBtn.classList.remove('show');
+    if(badge) badge.style.display='none';
+    setLnk('','');
     return;
   }
+
   ph.style.display='none';
   if(modeBar) modeBar.style.display='flex';
+  if(expandBtn) expandBtn.classList.add('show');
 
+  // Crear iframe si no existe
   if(!iframe){
-    iframe=document.createElement('iframe');
-    iframe.id='map-iframe';
-    iframe.style.cssText='width:100%;height:100%;border:none;position:absolute;inset:0;';
-    iframe.loading='lazy';
-    // Insertar antes del mode-bar para que quede detras
-    box.insertBefore(iframe, modeBar);
+    iframe = document.createElement('iframe');
+    iframe.id = 'map-iframe';
+    iframe.setAttribute('allowfullscreen','');
+    iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;inset:0;z-index:5;';
+    box.insertBefore(iframe, box.firstChild);
   }
+  iframe.style.display='block';
 
   if(o && d){
-    // RUTA TRAZADA: usar Google Maps Directions embed
-    iframe.src='https://www.google.com/maps/embed/v1/directions?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&origin='+encodeURIComponent(o)+'&destination='+encodeURIComponent(d)+'&mode=driving&language=es';
-    // Indicador visual de ruta
-    var badge=document.getElementById('map-badge');
-    if(!badge){
-      badge=document.createElement('div');
-      badge.id='map-badge';
-      badge.style.cssText='position:absolute;bottom:38px;left:8px;background:rgba(0,212,255,.9);color:#000;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;z-index:20;pointer-events:none;';
-      box.appendChild(badge);
-    }
-    badge.textContent='✓ Ruta trazada';
-    badge.style.display='block';
+    // ── RUTA COMPLETA ──
+    // Usar maps.google.com/maps con dir para trazar ruta (no requiere API key propia)
+    iframe.src = 'https://maps.google.com/maps?saddr='+encodeURIComponent(o)+'&daddr='+encodeURIComponent(d)+'&output=embed&hl=es';
+    if(badge){ badge.textContent='✓ Ruta: '+o.split(',')[0]+' → '+d.split(',')[0]; badge.style.display='block'; }
+    setLnk(
+      'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(o)+'&destination='+encodeURIComponent(d)+'&travelmode=driving',
+      '↗ Abrir ruta en Maps'
+    );
   } else {
-    // Solo origen
-    iframe.src='https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q='+encodeURIComponent(o)+'&language=es';
-    var badge=document.getElementById('map-badge');
+    // ── SOLO ORIGEN ──
+    iframe.src = 'https://maps.google.com/maps?q='+encodeURIComponent(o||d)+'&output=embed&hl=es&z=14';
     if(badge) badge.style.display='none';
+    setLnk(
+      'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o||d),
+      '↗ Ver en Maps'
+    );
   }
+}
 
+function setLnk(href, txt){
+  var lnk = document.getElementById('map-lnk');
+  if(!href){ if(lnk) lnk.style.display='none'; return; }
   if(!lnk){
-    lnk=document.createElement('a');
-    lnk.id='map-lnk';
+    lnk = document.createElement('a');
+    lnk.id = 'map-lnk';
     lnk.target='_blank'; lnk.rel='noopener';
     lnk.style.cssText='position:absolute;bottom:7px;right:7px;background:var(--neon);color:#000;padding:5px 12px;border-radius:8px;font-size:10px;font-weight:800;text-decoration:none;z-index:20;';
-    box.appendChild(lnk);
+    document.getElementById('map-box').appendChild(lnk);
   }
-  if(o && d){
-    lnk.textContent='↗ Ruta completa';
-    lnk.href='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(o)+'&destination='+encodeURIComponent(d)+'&travelmode=driving';
-  } else {
-    lnk.textContent='↗ Ver en Maps';
-    lnk.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o||d);
-  }
+  lnk.href=href; lnk.textContent=txt; lnk.style.display='block';
 }
 
 function setMapMode(mode){
